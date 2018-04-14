@@ -8,7 +8,7 @@
             </el-input>
             <el-button @click="queryFoodFunc()"
                        v-loading.fullscreen.lock="loading">
-                        查询美食
+                查询美食
             </el-button>
         </div>
         <div>
@@ -35,7 +35,7 @@
                     @current-change="handleCurrentChange"
                     layout="prev, pager, next"
                     :total="total">
-                    background
+                background
             </el-pagination>
         </div>
 
@@ -60,59 +60,61 @@
 </template>
 
 <script>
-    import $ from 'jquery';
-    export default {
-        data() {
-            return {
-                foodQuery: '',
-                foodList: [],
-                practice: [],
-                pageSize: 12,
-                total: 0,
-                currentPage: 1,
-                dialogVisible: false,
-                loading: false
-            }
-        },
+	import $ from 'jquery';
 
-        methods: {
-            queryFoodFunc: function () {
-                let self = this;
-                if (self.foodQuery.trim() !== '') {
-                    $.ajax({
-                        type: "get",
-                        dataType: 'jsonp',
-                        url: "http://apis.juhe.cn/cook/query.php?menu=" + self.foodQuery + "&dtype=&pn=" + self.currentPage + "&rn=" + self.pageSize + "&albums=&=&key=a9381db95a1fab2b1b54af914ff46ccc",
-                    }).done(function (data) {
-                        if (data.resultcode == 200) {
-                            self.foodList = data.result.data;
-                            self.total = parseInt(data.result.totalNum);
-                            self.currentPage = data.result.pn === '' ? 1 : parseInt(data.result.pn);
-                            self.loading = false;
-                        } else {
-                            self.loading = false;
-                            self.$message.error("查询菜谱失败，原因：" + data.reason);
-                        }
-                    }).fail(function () {
+	export default {
+		data() {
+			return {
+				foodQuery: '',
+				foodList: [],
+				practice: [],
+				pageSize: 12,
+				total: 0,
+				currentPage: 1,
+				dialogVisible: false,
+				loading: false
+			}
+		},
+
+		methods: {
+			queryFoodFunc: function () {
+				let self = this;
+				if (self.foodQuery.trim() === '') {
+				    return;
+                }
+                $.ajax({
+                    type: "get",
+                    dataType: 'jsonp',
+                    url: "http://apis.juhe.cn/cook/query.php?menu=" + self.foodQuery + "&dtype=&pn=" + self.currentPage + "&rn=" + self.pageSize + "&albums=&=&key=a9381db95a1fab2b1b54af914ff46ccc",
+                }).done(function (data) {
+                    if (data.resultcode == 200) {
+                        self.foodList = data.result.data;
+                        self.total = parseInt(data.result.totalNum);
+                        self.currentPage = data.result.pn === '' ? 1 : parseInt(data.result.pn);
                         self.loading = false;
-                        self.$message.error("查询菜谱失败");
-                    });
-                }
-            },
-            handleCurrentChange(val) {
-                this.currentPage = val;
-                this.queryFoodFunc();
-            },
-            openNext: function (id, data) {
-                for (let i = 0; i < data.length; i++) {
-                    if (data[i].id === id) {
-                        this.practice = data[i].steps;
+                    } else {
+                        self.loading = false;
+                        self.$message.error("查询菜谱失败，原因：" + data.reason);
                     }
-                }
-                this.dialogVisible = true;
-            },
-        }
-    }
+                }).fail(function () {
+                    self.loading = false;
+                    self.$message.error("查询菜谱失败");
+                });
+			},
+			handleCurrentChange(val) {
+				this.currentPage = val;
+				this.queryFoodFunc();
+			},
+			openNext: function (id, data) {
+				for (let i = 0; i < data.length; i++) {
+					if (data[i].id === id) {
+						this.practice = data[i].steps;
+					}
+				}
+				this.dialogVisible = true;
+			},
+		}
+	}
 </script>
 
 <style scoped>
@@ -185,23 +187,27 @@
         height: 200px;
         margin-bottom: 10px;
     }
-    .detail-content-left{
+
+    .detail-content-left {
         float: left;
         width: 60%;
         height: 100%
     }
 
     .detail-content-left img {
-        width:85%;
+        width: 85%;
         height: 100%
     }
-    .detail-content-right{
+
+    .detail-content-right {
         float: left;
         width: 40%;
         height: 100%
     }
-    .detail-content-right span{
-        float: left;width: 90%;height: 100%;
-    }
 
+    .detail-content-right span {
+        float: left;
+        width: 90%;
+        height: 100%;
+    }
 </style>
