@@ -1,8 +1,8 @@
 {
-  "name": "dailyRecord_client",
+  "name": "y",
   "version": "1.0.0",
-  "description": "",
-  "author": "magic lian",
+  "description": "y",
+  "author": "y",
   "private": true,
   "scripts": {
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
@@ -11,9 +11,7 @@
   },
   "dependencies": {
     "vue": "^2.5.2",
-    "vue-router": "^3.0.1",
-    "element-ui": "^2.3.4",
-    "jquery": "^3.2.1"
+    "vue-router": "^3.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
