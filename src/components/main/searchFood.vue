@@ -6,7 +6,10 @@
                       @keyup.enter.native="queryFoodFunc"
                       clearable>
             </el-input>
-            <el-button @click="queryFoodFunc()">查询美食</el-button>
+            <el-button @click="queryFoodFunc()"
+                       v-loading.fullscreen.lock="loading">
+                        查询美食
+            </el-button>
         </div>
         <div>
             <el-row :gutter="10">
@@ -30,21 +33,22 @@
         <div class="block" v-if="total!=0">
             <el-pagination
                     @current-change="handleCurrentChange"
-                    :current-page.sync="currentPage"
-                    :page-size="pageSize"
-                    layout="prev, pager, next, jumper"
+                    layout="prev, pager, next"
                     :total="total">
+                    background
             </el-pagination>
         </div>
 
         <!--详细做法-->
-        <el-dialog title="提示" :visible.sync="dialogVisible" :close-on-click-modal="false" width="50%" top="3%">
-            <div v-for="l in practice" style="width: 100%;margin-bottom: 10px;">
-                <div style="float: left;width: 60%;height: 200px">
-                    <img style="width:50%;height: 100%" :src="l.img" alt="">
+        <el-dialog title="提示" :visible.sync="dialogVisible" :close-on-click-modal="false" width="32%" top="3%">
+            <div v-for="step in practice" class="detail-content">
+                <div class="detail-content-left">
+                    <img :src="step.img">
                 </div>
-                <div style="float: left;width: 40%;">
-                    {{l.step}}
+                <div class="detail-content-right">
+                    <span>
+                        {{step.step}}
+                    </span>
                 </div>
                 <div class="clear"></div>
             </div>
@@ -56,55 +60,59 @@
 </template>
 
 <script>
-	import $ from 'jquery';
-	export default {
-		data() {
-			return {
-				foodQuery: '',
-				foodList: [],
-				practice:[],
-				pageSize:12,
-				total:0,
-				currentPage:1,
-				dialogVisible: false,
-			}
-		},
+    import $ from 'jquery';
+    export default {
+        data() {
+            return {
+                foodQuery: '',
+                foodList: [],
+                practice: [],
+                pageSize: 12,
+                total: 0,
+                currentPage: 1,
+                dialogVisible: false,
+                loading: false
+            }
+        },
 
-		methods: {
-			queryFoodFunc: function () {
-				let self = this;
-				if(this.foodQuery.trim() !== ''){
-					$.ajax({
-						type: "get",
-						dataType: 'jsonp',
-						url: "http://apis.juhe.cn/cook/query.php?menu=" + self.foodQuery + "&dtype=&pn="+self.currentPage+"&rn="+self.pageSize+"&albums=&=&key=a9381db95a1fab2b1b54af914ff46ccc",
-					}).done(function (data) {
-						if(data.resultcode == 200){
-							self.foodList = data.result.data;
-							self.total = parseInt(data.result.totalNum);
-							self.currentPage = data.result.pn === ''? 1 : parseInt(data.result.pn);
-						}else{
-							alert("查询菜谱失败，原因："+data.reason);
-						}
-					}).fail(function () {
-						alert("查询菜谱失败");
-					});
-				}
-			},
-			handleCurrentChange(val) {
-				this.currentPage = val;
-				this.queryFoodFunc();
-			},
-			openNext:function (id,data) {
-				for(let i = 0;i < data.length; i++) {
-					if (data[i].id === id){
-						this.practice = data[i].steps;
-					}
-				}
-				this.dialogVisible = true;
-			},
-		}
-	}
+        methods: {
+            queryFoodFunc: function () {
+                let self = this;
+                if (self.foodQuery.trim() !== '') {
+                    $.ajax({
+                        type: "get",
+                        dataType: 'jsonp',
+                        url: "http://apis.juhe.cn/cook/query.php?menu=" + self.foodQuery + "&dtype=&pn=" + self.currentPage + "&rn=" + self.pageSize + "&albums=&=&key=a9381db95a1fab2b1b54af914ff46ccc",
+                    }).done(function (data) {
+                        if (data.resultcode == 200) {
+                            self.foodList = data.result.data;
+                            self.total = parseInt(data.result.totalNum);
+                            self.currentPage = data.result.pn === '' ? 1 : parseInt(data.result.pn);
+                            self.loading = false;
+                        } else {
+                            self.loading = false;
+                            self.$message.error("查询菜谱失败，原因：" + data.reason);
+                        }
+                    }).fail(function () {
+                        self.loading = false;
+                        self.$message.error("查询菜谱失败");
+                    });
+                }
+            },
+            handleCurrentChange(val) {
+                this.currentPage = val;
+                this.queryFoodFunc();
+            },
+            openNext: function (id, data) {
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].id === id) {
+                        this.practice = data[i].steps;
+                    }
+                }
+                this.dialogVisible = true;
+            },
+        }
+    }
 </script>
 
 <style scoped>
@@ -112,7 +120,8 @@
         margin: 10px auto;
         width: 605px;
     }
-    .el-input{
+
+    .el-input {
         width: 500px;
     }
 
@@ -141,29 +150,58 @@
     .clearfix:after {
         clear: both
     }
-    .clear{
+
+    .clear {
         clear: both;
     }
-    .el-card{
+
+    .el-card {
         overflow: hidden;
         margin-bottom: 10px;
         height: 380px
     }
-    .el-card__body img{
-        transition:all .3s;
+
+    .el-card__body img {
+        transition: all .3s;
     }
-    .el-card__body :hover{
-        transform:scale(1.1) ;
+
+    .el-card__body :hover {
+        transform: scale(1.1);
     }
-    .el-card__body{
+
+    .el-card__body {
         line-height: 0;
     }
 
-    .card-content{
+    .card-content {
         padding: 14px;
         overflow: hidden;
         text-overflow: ellipsis;
         margin-top: 2vh;
         white-space: nowrap;
     }
+
+    .detail-content {
+        height: 200px;
+        margin-bottom: 10px;
+    }
+    .detail-content-left{
+        float: left;
+        width: 60%;
+        height: 100%
+    }
+
+    .detail-content-left img {
+        width:85%;
+        height: 100%
+    }
+    .detail-content-right{
+        float: left;
+        width: 40%;
+        height: 100%
+    }
+    .detail-content-right span{
+        float: left;width: 90%;height: 100%;
+    }
+
 </style>

@@ -17,12 +17,7 @@
 		data () {
 			return {
 			}
-		},
-        methods : {
-//	        searchFoodFunc : function () {
-//
-//	        }
-        }
+		}
 	}
 </script>
 
