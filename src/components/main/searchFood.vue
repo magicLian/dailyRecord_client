@@ -11,8 +11,9 @@
                 查询美食
             </el-button>
         </div>
+
         <div>
-            <el-row :gutter="10">
+            <el-row :gutter="8">
                 <el-col :span="4" v-for="food in foodList">
                     <el-card>
                         <img :src="food.albums" class="image">
@@ -35,12 +36,12 @@
                     @current-change="handleCurrentChange"
                     layout="prev, pager, next"
                     :total="total">
-                background
+                    background
             </el-pagination>
         </div>
 
         <!--详细做法-->
-        <el-dialog title="提示" :visible.sync="dialogVisible" :close-on-click-modal="false" width="32%" top="3%">
+        <el-dialog title="步驟" :visible.sync="dialogVisible" :close-on-click-modal="false" width="32%" top="3%">
             <div v-for="step in practice" class="detail-content">
                 <div class="detail-content-left">
                     <img :src="step.img">
@@ -61,7 +62,6 @@
 
 <script>
 	import $ from 'jquery';
-
 	export default {
 		data() {
 			return {
@@ -75,31 +75,32 @@
 				loading: false
 			}
 		},
-
 		methods: {
 			queryFoodFunc: function () {
 				let self = this;
+				self.loading = true;
 				if (self.foodQuery.trim() === '') {
-				    return;
-                }
-                $.ajax({
-                    type: "get",
-                    dataType: 'jsonp',
-                    url: "http://apis.juhe.cn/cook/query.php?menu=" + self.foodQuery + "&dtype=&pn=" + self.currentPage + "&rn=" + self.pageSize + "&albums=&=&key=a9381db95a1fab2b1b54af914ff46ccc",
-                }).done(function (data) {
-                    if (data.resultcode == 200) {
-                        self.foodList = data.result.data;
-                        self.total = parseInt(data.result.totalNum);
-                        self.currentPage = data.result.pn === '' ? 1 : parseInt(data.result.pn);
-                        self.loading = false;
-                    } else {
-                        self.loading = false;
-                        self.$message.error("查询菜谱失败，原因：" + data.reason);
-                    }
-                }).fail(function () {
-                    self.loading = false;
-                    self.$message.error("查询菜谱失败");
-                });
+					self.loading = false;
+					return;
+				}
+				$.ajax({
+					type: "get",
+					dataType: 'jsonp',
+					url: "http://apis.juhe.cn/cook/query.php?menu=" + self.foodQuery + "&dtype=&pn=" + self.currentPage + "&rn=" + self.pageSize + "&albums=&=&key=a9381db95a1fab2b1b54af914ff46ccc",
+				}).done(function (data) {
+					if (data.resultcode == 200) {
+						self.foodList = data.result.data;
+						self.total = parseInt(data.result.totalNum);
+						self.currentPage = data.result.pn === '' ? 1 : parseInt(data.result.pn);
+						self.loading = false;
+					} else {
+						self.loading = false;
+						self.$message.error("查询菜谱失败，原因：" + data.reason);
+					}
+				}).fail(function () {
+					self.loading = false;
+					self.$message.error("查询菜谱失败");
+				});
 			},
 			handleCurrentChange(val) {
 				this.currentPage = val;
@@ -125,6 +126,10 @@
 
     .el-input {
         width: 500px;
+    }
+
+    .el-row{
+        width:100%;
     }
 
     .bottom {
