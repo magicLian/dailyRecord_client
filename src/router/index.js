@@ -3,6 +3,7 @@ import Router from 'vue-router';
 import MainPage from '@/components/main';
 import SearchFood from '@/components/main/searchFood';
 import Home from '@/components/main/home';
+import PrivatePhoto from '@/components/main/privatePhoto';
 
 Vue.use(Router);
 
@@ -27,6 +28,11 @@ export default new Router({
 					path: '/index/home',
 					name:'Home',
 					component:Home,
+				},
+				{
+					path: '/index/project/privatePhotos',
+					name:'PrivatePhoto',
+					component:PrivatePhoto
 				}]
 		}
 	]

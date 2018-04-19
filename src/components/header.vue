@@ -12,6 +12,7 @@
             <el-submenu index="/index/project">
                 <template slot="title">My-Project</template>
                 <el-menu-item index="/index/project/searchFood">Search-Food</el-menu-item>
+                <el-menu-item index="/index/project/privatePhotos">Private-Photos</el-menu-item>
             </el-submenu>
         </el-menu>
         <div class="line"></div>

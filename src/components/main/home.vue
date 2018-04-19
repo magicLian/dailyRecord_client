@@ -25,7 +25,7 @@ export default {
         return {
             me :{
             	hello : "Hello,I'm Magic Lian",
-                major : "fullstack Web Programmer"
+                major : "Fullstack Web Programmer"
             },
             headerImages : {
             	item :[{
