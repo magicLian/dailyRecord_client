@@ -13,6 +13,24 @@
             </div>
         </el-dialog>
 
+        <el-row :gutter="8">
+            <el-col :span="4" v-for="photo in photoList">
+                <el-card>
+                    <img :src="photo.url" class="image">
+                </el-card>
+            </el-col>
+        </el-row>
+
+        <!--分页-->
+        <div class="block" v-if="photoList !=null">
+            <el-pagination
+                    @current-change="handleCurrentChange"
+                    layout="prev, pager, next"
+                    :total="photoQuery.total">
+                    background
+            </el-pagination>
+        </div>
+
 
     </div>
 </template>
@@ -25,12 +43,17 @@
 		data () {
 			return {
 				photoList : [],
-                ipassword : 'c6f057b86584942e415435ffb1fa93d4',
-				dialogFormVisible : false,
 				dialogForm: {
 					password: '',
-					formLabelWidth: '100px'
+					formLabelWidth: '100px',
+					ipassword : 'c6f057b86584942e415435ffb1fa93d4',
+					dialogFormVisible : false,
 				},
+                photoQuery :{
+	                loading : false,
+	                currentPage : 1,
+	                total:0
+                }
 			}
 		},
         mounted: function(){
@@ -75,8 +98,31 @@
 	            }
             },
             queryPhotoInfo : function () {
-
-            }
+	            let self = this;
+	            self.photoQuery.loading = true;
+	            $.ajax({
+		            type: "get",
+		            dataType: 'jsonp',
+		            url: "http://apis.juhe.cn/cook/query.php?menu=" + self.foodQuery + "&dtype=&pn=" + self.currentPage + "&rn=" + self.pageSize + "&albums=&=&key=a9381db95a1fab2b1b54af914ff46ccc",
+	            }).done(function (data) {
+		            if (data.resultcode === 0) {
+			            self.photoList = data.result.data;
+			            self.total = parseInt(data.result.totalNum);
+			            self.currentPage = data.result.page;
+			            self.photoQuery.loading = false;
+		            } else {
+			            self.photoQuery.loading = false;
+			            self.$message.error("查询照片失败，原因：" + data.message);
+		            }
+	            }).fail(function () {
+		            self.photoQuery.loading = false;
+		            self.$message.error("查询照片失败");
+	            });
+            },
+	        handleCurrentChange(val) {
+		        this.currentPage = val;
+		        this.queryPhotoInfo();
+	        }
         }
 	}
 </script>
