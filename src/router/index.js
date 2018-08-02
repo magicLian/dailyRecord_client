@@ -4,13 +4,17 @@ import MainPage from '@/components/main';
 import SearchFood from '@/components/main/searchFood';
 import Home from '@/components/main/home';
 import PrivatePhoto from '@/components/main/privatePhoto';
+import login from '@/components/login';
 
 Vue.use(Router);
 
 export default new Router({
 	routes: [{
 		path: '/',
-		redirect: '/index'
+		redirect: '/login'
+	},{
+		path : '/login',
+		component: login,
 	},{
 		path : '/index',
 		redirect: '/index/home',
