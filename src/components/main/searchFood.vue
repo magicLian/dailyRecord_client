@@ -41,7 +41,7 @@
         </div>
 
         <!--详细做法-->
-        <el-dialog title="步驟" :visible.sync="dialogVisible" :close-on-click-modal="false" width="32%" top="3%">
+        <el-dialog title="操作" :visible.sync="dialogVisible" :close-on-click-modal="false" width="32%" top="3%">
             <div v-for="step in practice" class="detail-content">
                 <div class="detail-content-left">
                     <img :src="step.img">

@@ -16,6 +16,8 @@
         <div class="my-product">
 
         </div>
+        <!--<canvas id="a" width="800" height="600" style="border: 1px solid black"></canvas>-->
+        <!--<button @click="getImageData">获取</button>-->
     </div>
 </template>
 
@@ -33,7 +35,27 @@ export default {
             	}]
             }
         }
-    }
+    },
+    mounted : function () {
+        //this.createCanvas();
+    },
+    methods :{
+        createCanvas : function () {
+	        var canvas = document.getElementById('a');
+	        var canvasCtx = canvas.getContext('2d');
+	        var image = new Image();
+
+	        image.onload  = function(){
+		        canvasCtx.drawImage(this,0,0,canvas.width,canvas.height);
+	        };
+	        image.crossOrigin = '*';
+	        image.src = "http://magic-private-photos.oss-cn-hangzhou.aliyuncs.com/project/tooth2.png";
+        },
+        getImageData : function () {
+	        var canvas = document.getElementById('a');
+	        console.log(canvas.toDataURL());
+        }
+	}
 }
 </script>
 
@@ -43,7 +65,6 @@ export default {
         width: 100%;
         position: absolute;
     }
-
     .my-banner > h1 {
         color: #ffffff;
         font-size: 3.2em;
@@ -55,7 +76,6 @@ export default {
         top: 30%;
         left:25%;
     }
-
     .my-banner > h3 {
         color: #cbcbcb;
         font-size: 1.6em;
@@ -67,7 +87,6 @@ export default {
         top: 40%;
         left:29%;
     }
-
     .my-banner > img {
         width: 100%;
         height: 100%;
@@ -79,7 +98,6 @@ export default {
         right: 0;
         bottom: 0;
     }
-
     .my-introduce{
         height: 800px;
         border: black solid 1px;
@@ -87,7 +105,6 @@ export default {
         position: absolute;
         top:660px;
     }
-
     .my-product {
         height: 500px;
         border: red solid 1px;

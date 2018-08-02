@@ -8,32 +8,26 @@ import PrivatePhoto from '@/components/main/privatePhoto';
 Vue.use(Router);
 
 export default new Router({
-	routes: [
-		{
-			path: '/',
-			redirect: '/index'
-		},
-		{
-			path : '/index',
-			redirect: '/index/home',
-			name: 'mainPage',
-			component: MainPage,
-				children:[
-				{
-					path: '/index/project/searchFood',
-					name:'SearchFood',
-					component:SearchFood
-				},
-				{
-					path: '/index/home',
-					name:'Home',
-					component:Home,
-				},
-				{
-					path: '/index/project/privatePhotos',
-					name:'PrivatePhoto',
-					component:PrivatePhoto
-				}]
-		}
-	]
+	routes: [{
+		path: '/',
+		redirect: '/index'
+	},{
+		path : '/index',
+		redirect: '/index/home',
+		name: 'mainPage',
+		component: MainPage,
+		children:[{
+			path: '/index/project/searchFood',
+			name:'SearchFood',
+			component:SearchFood
+		},{
+			path: '/index/home',
+			name:'Home',
+			component:Home,
+		},{
+			path: '/index/project/privatePhotos',
+			name:'PrivatePhoto',
+			component:PrivatePhoto
+		}]
+	}]
 })
