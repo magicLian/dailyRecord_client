@@ -31,7 +31,7 @@ body, html {
     background:-moz-linear-gradient(top,#7da2e8,#c3deee 30%,#f7fcff);
     background:-ms-linear-gradient(top,#7da2e8,#c3deee 30%,#f7fcff);
     background:linear-gradient(top,#7da2e8,#c3deee 30%,#f7fcff);
-    filter:progid:DXImageTransform.Microsoft.gradient(enabled=true，GradientType:0,startColorstr='#7da2e8', endColorstr='#f7fcff');
+    filter:progid:DXImageTransform.Microsoft.gradient(enabled=true,GradientType=0,startColorstr='#7da2e8', endColorstr='#f7fcff');
 }
 /*海洋*/
 .sea {
@@ -40,7 +40,7 @@ body, html {
     background:-moz-linear-gradient(top,#E7EEEC,#89A0CB 35%,#455D82 70%,#23373E);;
     background:-ms-linear-gradient(top,#E7EEEC,#89A0CB 35%,#455D82 70%,#23373E);;
     background:linear-gradient(top,#E7EEEC,#89A0CB 35%,#455D82 70%,#23373E);;
-    filter:progid:DXImageTransform.Microsoft.gradient(enabled=true，GradientType:0,startColorstr='#e7eef8', endColorstr='#23375e');
+    filter:progid:DXImageTransform.Microsoft.gradient(enabled=true，GradientType=0,startColorstr='#e7eef8', endColorstr='#23375e');
 }
 /*太阳*/
 .sun {
