@@ -73,7 +73,7 @@ export default {
     .main{
         width: 100%;
         height: 100%;
-        background: #e2e2e2;
+        background: #fcfcfc;
     }
     .my-banner{
         height: 200px;
@@ -124,6 +124,6 @@ export default {
     }
     .el-card :hover{
         cursor: pointer;
-        color: #8ca4ff;
+        color: #ff9069;
     }
 </style>
