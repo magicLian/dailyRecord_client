@@ -3,10 +3,10 @@
         <!--banner-->
         <div class="my-banner">
             <el-row>
-                <h1 class="title">·介绍</h1>
+                <h1 class="title">· Intro</h1>
             </el-row>
             <el-row>
-                <h2 class="title">bb && jj 's house</h2>
+                <h2 class="title">bb && jj's house</h2>
             </el-row>
         </div>
 
@@ -14,14 +14,14 @@
         <div class="my-product">
             <el-row>
                 <el-col :span="24">
-                    <h1 class="title">·功能</h1>
+                    <h1 class="title">· Func</h1>
                 </el-col>
             </el-row>
-            <el-row :gutter="40">
-                <el-col :span="6" v-for="product in products">
-                    <el-card :body-style="{height: '300px',padding: '10px'}" shadow="hover">
+            <el-row :gutter="20">
+                <el-col :span="3" v-for="product in products">
+                    <el-card :body-style="{height: '200px',padding: '10px'}" shadow="hover">
                         <img :src="product.img" class="image">
-                        <div style="padding: 14px;height: 20%;font-size: 20px;">
+                        <div style="padding: 14px;height: 20%;font-size: 14px;">
                             <span>{{product.name}}</span>
                         </div>
                     </el-card>
@@ -45,7 +45,10 @@ export default {
             	}]
             },
             products : [{
-            	name : '大姨妈助手',
+	            name : 'Eat What？',
+	            img: require('../../assets/images/eatWhat.jpg')
+            },{
+            	name : 'Period Helper',
                 img: require('../../assets/images/dayimazhushou.jpg')
             },{
             	name : 'To Do List',
@@ -70,12 +73,13 @@ export default {
     .main{
         width: 100%;
         height: 100%;
-        background: #e9e9e9
+        background: #e2e2e2;
     }
     .my-banner{
         height: 200px;
         width: 90%;
         position: absolute;
+        padding: 10px;
         margin-left: 20px;
         margin-right: 20px;
     }
@@ -103,6 +107,7 @@ export default {
         height: 500px;
         width: 90%;
         position: absolute;
+        padding: 10px;
         top: 260px;
         margin-left: 20px;
         margin-right: 20px;
