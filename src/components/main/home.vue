@@ -1,23 +1,33 @@
 <template>
-    <div>
+    <div class="main">
         <!--banner-->
         <div class="my-banner">
-            <h1>{{ me.hello }}</h1>
-            <h3>{{me.major}}</h3>
-            <img :src="headerImages.item[0].src"/>
+            <el-row>
+                <h1 class="title">·介绍</h1>
+            </el-row>
+            <el-row>
+                <h2 class="title">bb && jj 's house</h2>
+            </el-row>
         </div>
-        <!--introduce-->
-        <div class="my-introduce">
-
-        </div>
-
 
         <!--product-->
         <div class="my-product">
-
+            <el-row>
+                <el-col :span="24">
+                    <h1 class="title">·功能</h1>
+                </el-col>
+            </el-row>
+            <el-row :gutter="40">
+                <el-col :span="6" v-for="product in products">
+                    <el-card :body-style="{height: '300px',padding: '10px'}" shadow="hover">
+                        <img :src="product.img" class="image">
+                        <div style="padding: 14px;height: 20%;font-size: 20px;">
+                            <span>{{product.name}}</span>
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
         </div>
-        <!--<canvas id="a" width="800" height="600" style="border: 1px solid black"></canvas>-->
-        <!--<button @click="getImageData">获取</button>-->
     </div>
 </template>
 
@@ -33,59 +43,50 @@ export default {
             	item :[{
             		src : require('../../assets/banner.jpg')
             	}]
-            }
+            },
+            products : [{
+            	name : '大姨妈助手',
+                img: require('../../assets/images/dayimazhushou.jpg')
+            },{
+            	name : 'To Do List',
+	            img: require('../../assets/images/todolist.png')
+            }]
         }
     },
     mounted : function () {
-        //this.createCanvas();
+
     },
     methods :{
-        createCanvas : function () {
-	        var canvas = document.getElementById('a');
-	        var canvasCtx = canvas.getContext('2d');
-	        var image = new Image();
 
-	        image.onload  = function(){
-		        canvasCtx.drawImage(this,0,0,canvas.width,canvas.height);
-	        };
-	        image.crossOrigin = '*';
-	        image.src = "http://magic-private-photos.oss-cn-hangzhou.aliyuncs.com/project/tooth2.png";
-        },
-        getImageData : function () {
-	        var canvas = document.getElementById('a');
-	        console.log(canvas.toDataURL());
-        }
 	}
 }
 </script>
 
 <style scoped>
-    .my-banner{
-        height: 600px;
-        width: 100%;
-        position: absolute;
+    .el-row {
+        margin-bottom: 20px;
     }
-    .my-banner > h1 {
-        color: #ffffff;
+
+    .main{
+        width: 100%;
+        height: 100%;
+        background: #e9e9e9
+    }
+    .my-banner{
+        height: 200px;
+        width: 90%;
+        position: absolute;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .my-banner > h2 {
+        float: left;
+        color: #313131;
         font-size: 3.2em;
         line-height: 150px;
-        margin: 0;
-        text-align: center;
         position: absolute;
         z-index: 3;
-        top: 30%;
-        left:25%;
-    }
-    .my-banner > h3 {
-        color: #cbcbcb;
-        font-size: 1.6em;
-        line-height: 150px;
-        margin: 0;
-        text-align: center;
-        position: absolute;
-        z-index: 3;
-        top: 40%;
-        left:29%;
+        top: 16%;
     }
     .my-banner > img {
         width: 100%;
@@ -98,18 +99,26 @@ export default {
         right: 0;
         bottom: 0;
     }
-    .my-introduce{
-        height: 800px;
-        border: black solid 1px;
-        width: 100%;
-        position: absolute;
-        top:660px;
-    }
     .my-product {
         height: 500px;
-        border: red solid 1px;
-        width: 100%;
+        width: 90%;
         position: absolute;
-        top: 1460px;
+        top: 260px;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+    .title{
+        font-size: 20px;
+        float: left;
+    }
+
+    .image{
+        width: 100%;
+        height: 80%;
+        overflow: hidden;
+    }
+    .el-card :hover{
+        cursor: pointer;
+        color: #8ca4ff;
     }
 </style>
