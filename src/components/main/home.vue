@@ -6,7 +6,7 @@
                 <h1 class="title">· Intro</h1>
             </el-row>
             <el-row>
-                <h2 class="title">bb && jj's house</h2>
+                <h2 class="title">{{intro.hello}}</h2>
             </el-row>
         </div>
 
@@ -20,9 +20,11 @@
             <el-row :gutter="20">
                 <el-col :span="3" v-for="product in products">
                     <el-card :body-style="{height: '200px',padding: '10px'}" shadow="hover">
-                        <img :src="product.img" class="image">
-                        <div style="padding: 14px;height: 20%;font-size: 14px;">
-                            <span>{{product.name}}</span>
+                        <div @click="openApp(product.url)" style="width: 100%;height: 100%">
+                            <img :src="product.img" class="image">
+                            <div style="padding: 14px;height: 20%;font-size: 14px;">
+                                <span>{{product.name}}</span>
+                            </div>
                         </div>
                     </el-card>
                 </el-col>
@@ -35,9 +37,8 @@
 export default {
     data () {
         return {
-            me :{
-            	hello : "Hello,I'm Magic Lian",
-                major : "Fullstack Web Programmer"
+            intro :{
+            	hello : "bb && jj's house"
             },
             headerImages : {
             	item :[{
@@ -46,21 +47,25 @@ export default {
             },
             products : [{
 	            name : 'Eat What？',
-	            img: require('../../assets/images/eatWhat.jpg')
+	            img: require('../../assets/images/eatWhat.jpg'),
+                url : '/index/project/searchFood'
             },{
             	name : 'Period Helper',
-                img: require('../../assets/images/dayimazhushou.jpg')
+                img: require('../../assets/images/dayimazhushou.jpg'),
+	            url : '/index/project/periodHelper'
             },{
             	name : 'To Do List',
-	            img: require('../../assets/images/todolist.png')
+	            img: require('../../assets/images/todolist.png'),
+	            url : '/index/project/todoList'
             }]
         }
     },
     mounted : function () {
-
     },
     methods :{
-
+	    openApp :function (url) {
+		    this.$router.push(url);
+	    }
 	}
 }
 </script>
