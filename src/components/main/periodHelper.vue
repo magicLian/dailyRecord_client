@@ -1,11 +1,20 @@
 <template>
     <div>
-
+        <div class="calendarContent">
+            <Calendar ref="Calendar"
+              :sundayStart="true"
+              :markDateMore="arr"
+              :markDate="arr2"
+              v-on:isToday="clickToday" agoDayHide="1530115200"
+              v-on:choseDay="clickDay"
+              v-on:changeMonth="changeDate"></Calendar>
+        </div>
     </div>
 </template>
 
 <script>
 	import $ from 'jquery';
+	import Calendar from '../vue-calendar/index';
 	export default {
 		data() {
 			return {
@@ -16,9 +25,37 @@
 				total: 0,
 				currentPage: 1,
 				dialogVisible: false,
-				loading: false
+				loading: false,
+
+				arr2: [],
+				arr: [{
+                    date: '2018/6/1',
+                    className: 'mark1'
+                },
+                {
+                    date: '2018/6/13',
+                    className: 'mark2'
+                }]
 			}
 		},
+		components: {
+			Calendar
+		},
+        mounted : function(){
+	        function format(date, index) {
+                date = new Date(date);
+                return `${date.getFullYear()}-${date.getMonth() + 1}-${index}`;
+            }
+
+            this.arr = [{
+                date: format(new Date(), 1),
+                className: 'mark1'
+            },
+            {
+                date: format(new Date(), 13),
+                className: 'mark2'
+            }];
+        },
 		methods: {
 			queryFoodFunc: function () {
 				let self = this;
@@ -58,6 +95,20 @@
 				}
 				this.dialogVisible = true;
 			},
+			clickDay(data) {
+				console.log('选中了', data); //选中某天
+				this.$toast('选中了' + data);
+			},
+			clickToday(data) {
+				console.log('跳到了本月今天', data); //跳到了本月
+			},
+			changeDate(data) {
+				this.$toast('切换到的月份为' + data);
+				console.log('左右点击切换月份', data); //左右点击切换月份
+			},
+			demo() {
+				this.$refs.Calendar.ChoseMonth('2018-12-13'); //跳到12月12日选中12月12日
+			}
 		}
 	}
 </script>
@@ -157,5 +208,11 @@
         float: left;
         width: 90%;
         height: 100%;
+    }
+    .calendarContent{
+        width: 50%;
+        height: 400px;
+        background: #dedede;
+        margin: 0 auto;
     }
 </style>
