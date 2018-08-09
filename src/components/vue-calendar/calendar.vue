@@ -3,7 +3,6 @@
         margin: 0;
         padding: 0;
     }
-
     .wh_container {
         width: 100%;
         height: 100%;
@@ -13,11 +12,9 @@
     li {
         list-style-type: none;
     }
-
     .wh_top_changge {
         display: flex;
     }
-
     .wh_top_changge li {
         cursor: pointer;
         display: flex;
@@ -28,12 +25,10 @@
         align-items: center;
         height: 50px;
     }
-
     .wh_top_changge .wh_content_li {
         cursor: auto;
         flex: 2.5;
     }
-
     .wh_content_all {
         font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
         "Helvetica Neue", STHeiti, "Microsoft Yahei", Tahoma, Simsun, sans-serif;
@@ -49,44 +44,36 @@
         flex-wrap: wrap;
         padding: 0 3% 0 3%;
         width: 100%;
-        height: 40px;
+        height: 30px;
+        font-size: 12px;
+        color: #6f7180;
     }
-
     .wh_content {
         display: flex;
         flex-wrap: wrap;
         padding: 0 3% 0 3%;
         width: 100%;
     }
-
-    .wh_content:first-child .wh_content_item_tag,
-    .wh_content:first-child .wh_content_item {
-        color: #ddd;
-        font-size: 16px;
-    }
-
-    .wh_content_item,
-    wh_content_item_tag {
-        font-size: 15px;
+    .wh_content_item_weekday {
+        height: 30px;
         width: 13.4%;
-        text-align: center;
-        color: #252525;
-        position: relative;
     }
-
-    .wh_content_item {
-        height: 50px;
-        position: relative;
-    }
-
-    .wh_top_tag {
-        width: 40px;
-        height: 40px;
+    .wh_top_tag_weekday {
+        width: 30px;
+        height: 30px;
         line-height: 40px;
         margin: auto;
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+
+    .wh_content_item {
+        font-size: 15px;
+        width: 13.5%;
+        height: 50px;
+        text-align: center;
+        color: #252525;
     }
 
     .wh_item_date {
@@ -96,12 +83,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        position: absolute;
-        left:calc(50% - 20px);
-        top:calc(50% - 20px);
     }
 
-    .wh_item_date:hover {
+    .wh_content_item:hover .wh_item_date{
         cursor: pointer;
         border-radius: 100px;
         border: 3px solid #6db6dd;
@@ -116,12 +100,10 @@
         border-left: 2px solid #252525;
         transform: rotate(-45deg);
     }
-
     .wh_jiantou1:active,
     .wh_jiantou2:active {
         border-color: #ddd;
     }
-
     .wh_jiantou2 {
         width: 12px;
         height: 12px;
@@ -136,34 +118,23 @@
         background: blue;
         z-index: 2;
     }
-
     .wh_content_item .wh_other_dayhide {
         color: #bfbfbf;
         border-radius: 100px;
     }
-
     .wh_content_item .wh_want_dayhide {
         color: #bfbfbf;
         border-radius: 100px;
     }
-
     .wh_content_item .wh_isToday {
         background: #ff836b;
         border-radius: 90px;
     }
-
     .wh_content_item .wh_chose_day {
         border-radius: 100px;
         border: 3px solid #6db6dd;
         width: 44px;
         height: 44px;
-    }
-
-    .wh_content_all{
-        height:100%;
-    }
-    .content{
-        height:100%;
     }
 </style>
 <template>
@@ -179,8 +150,8 @@
                 </li>
             </div>
             <div class="wh_content_weekday">
-                <div class="wh_content_item" v-for="tag in textTop">
-                    <div class="wh_top_tag">
+                <div class="wh_content_item_weekday" v-for="tag in textTop">
+                    <div class="wh_top_tag_weekday">
                         {{tag}}
                     </div>
                 </div>
@@ -201,7 +172,7 @@
 	export default {
 		data() {
 			return {
-				textTop: ['一', '二', '三', '四', '五', '六', '日'],
+				textTop: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
 				myDate: [],
 				list: [],
 				historyChose: [],
@@ -231,9 +202,9 @@
 		methods: {
 			intStart() {
 				if (this.sundayStart) {
-					this.textTop = ['日', '一', '二', '三', '四', '五', '六'];
+					this.textTop = [ '周日', '周一','周二', '周三', '周四', '周五', '周六'];
 				} else {
-					this.textTop = ['一', '二', '三', '四', '五', '六', '日'];
+					this.textTop = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 				}
 				timeUtil.sundayStart = this.sundayStart;
 			},
