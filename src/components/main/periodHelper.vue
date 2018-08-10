@@ -1,14 +1,14 @@
 <template>
-    <div class="calendarContainer">
-        <div class="calendarContent">
-            <Calendar ref="Calendar"
-                      :sundayStart="true"
-                      :markDateMore="arr"
-                      :markDate="arr2"
-                      v-on:isToday="clickToday"
-                      v-on:choseDay="clickDay"
-                      v-on:changeMonth="changeDate">
-            </Calendar>
+    <div class="main">
+        <div class="calendarContainer">
+            <div class="calendarContent">
+                <Calendar ref="Calendar"
+                          :sundayStart="true"
+                          :markDateMore="arr"
+                          v-on:choseDay="clickDay"
+                          v-on:changeMonth="changeDate">
+                </Calendar>
+            </div>
         </div>
     </div>
 </template>
@@ -16,6 +16,9 @@
 <script>
 	import $ from 'jquery';
 	import Calendar from '../vue-calendar/index';
+	import timeUtil from '../vue-calendar/calendar';
+	import ElRow from "element-ui/packages/row/src/row";
+	import ElCol from "element-ui/packages/col/src/col";
 
 	export default {
 		data() {
@@ -23,18 +26,18 @@
 				dialogVisible: false,
 				loading: false,
                 message : "",
-
-				arr2: [],
 				arr: [{
-                    date: '2018/8/6',
+                    date: '2018-8-6',
                     className: 'mark1'
                 },{
-                    date: '2018/8/1',
+                    date: '2018-8-1',
                     className: 'mark2'
                 }]
 			}
 		},
 		components: {
+			ElCol,
+			ElRow,
 			Calendar
 		},
 		methods: {
@@ -54,10 +57,13 @@
 			openNext: function (id, data) {
 				this.dialogVisible = true;
 			},
-
 			clickDay(data) {
 				console.log('选中了', data);
 				this.$message('选中了' + data);
+				const today = new Date();
+				if(timeUtil.compareDate(data,today)){
+					this.$message('无法编辑未来');
+                }
 			},
 			clickToday(data) {
 				console.log('跳到了本月今天', data);
@@ -74,17 +80,26 @@
 	}
 </script>
 <style>
+    .main{
+        width: 100%;
+        height: 100%;
+        background: #f05c7000;
+    }
+
     .calendarContainer{
         width: 100%;
-        height: 40%;
+        max-width: 800px;
+        height: 50%;
+        min-height: 380px;
+        margin: 0 auto;
     }
 
     .calendarContent{
-        width: 30%;
+        width: 100%;
         height: 100%;
         background: #dedede;
         float: left;
-        /*margin: 0 auto;*/
+        margin: 0 auto;
     }
 
     .mark1 {
