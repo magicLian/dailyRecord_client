@@ -1,50 +1,48 @@
 <template>
     <div class="main">
-        <div class="calendarContainer">
-            <div class="calendarContent">
-                <Calendar ref="Calendar"
-                    :sundayStart="true"
-                    :markDateMore="chooseDay"
-                    v-on:choseDay="clickDay"
-                    v-on:changeMonth="changeDate">
-                </Calendar>
-            </div>
-        </div>
+        <!--<div class="calendarContainer">-->
+            <!--<div class="calendarContent">-->
+                <!--<Calendar ref="Calendar"-->
+                          <!--:sundayStart="true"-->
+                          <!--:markDateMore="chooseDay"-->
+                          <!--v-on:choseDay="clickDay"-->
+                          <!--v-on:changeMonth="changeDate">-->
+                <!--</Calendar>-->
+            <!--</div>-->
+        <!--</div>-->
         <!--<div class="colorForWhat">-->
             <!--<li><span style="background: rgba(255,60,81,0.91)"></span>经期</li>-->
             <!--<li><span style="background: rgba(255,60,81,0.53)"></span>预测经期</li>-->
             <!--<li><span style="background: #ff83d3;"></span>排卵期</li>-->
         <!--</div>-->
-        <!--<div class="todayDetailInfo" :visible.sync="todayDetailVisible">-->
-            <!--<el-form ref="form" label-width="80px">-->
-                <!--<el-form-item label="经期开始">-->
-                    <!--<el-switch v-model="todayDetail.isPeriodStart"></el-switch>-->
-                <!--</el-form-item>-->
-                <!--<el-form-item label="经期结束">-->
-                    <!--<el-switch v-model="todayDetail.isPeriodEnd"></el-switch>-->
-                <!--</el-form-item>-->
-                <!--<el-form-item>-->
-                    <!--<el-collapse>-->
-                        <!--<el-collapse-item title="月经详情">-->
-                            <!--<el-checkbox-group v-model="todayDetail.periodHurt">-->
-                                <!--<el-checkbox-button label="轻度" value="1"></el-checkbox-button>-->
-                                <!--<el-checkbox-button label="中度" value="2"></el-checkbox-button>-->
-                                <!--<el-checkbox-button label="重度" value="3"></el-checkbox-button>-->
-                            <!--</el-checkbox-group>-->
-                        <!--</el-collapse-item>-->
-                    <!--</el-collapse>-->
-                <!--</el-form-item>-->
-                <!--<el-form-item label="爱爱">-->
-                    <!--<el-switch v-model="todayDetail.hasLove"></el-switch>-->
-                <!--</el-form-item>-->
-                <!--<el-form-item label="爱爱">-->
-                    <!--<el-switch v-model="todayDetail.hasLove"></el-switch>-->
-                <!--</el-form-item>-->
-                <!--<el-form-item label="爱爱">-->
-                    <!--<el-switch v-model="todayDetail.hasLove"></el-switch>-->
-                <!--</el-form-item>-->
-            <!--</el-form>-->
-        <!--</div>-->
+        <div class="todayDetailInfo" :visible.sync="todayDetailVisible">
+            <el-form ref="form" label-width="80px">
+                <el-form-item label="经期开始">
+                    <el-switch v-model="todayDetail.isPeriodStart"></el-switch>
+                </el-form-item>
+                <el-form-item label="经期结束">
+                    <el-switch v-model="todayDetail.isPeriodEnd"></el-switch>
+                </el-form-item>
+                <el-collapse>
+                    <el-collapse-item title="月经详情">
+                        <el-checkbox-group v-model="todayDetail.periodHurt">
+                            <el-checkbox-button label="轻度" value="1"></el-checkbox-button>
+                            <el-checkbox-button label="中度" value="2"></el-checkbox-button>
+                            <el-checkbox-button label="重度" value="3"></el-checkbox-button>
+                        </el-checkbox-group>
+                    </el-collapse-item>
+                </el-collapse>
+                <el-form-item label="爱爱">
+                    <el-switch v-model="todayDetail.hasLove"></el-switch>
+                </el-form-item>
+                <el-form-item label="爱爱">
+                    <el-switch v-model="todayDetail.hasLove"></el-switch>
+                </el-form-item>
+                <el-form-item label="爱爱">
+                    <el-switch v-model="todayDetail.hasLove"></el-switch>
+                </el-form-item>
+            </el-form>
+        </div>
     </div>
 </template>
 
@@ -140,7 +138,6 @@
         max-width: 800px;
         margin: 0 auto;
         display: flex;
-        padding: 0 20px;
         background: #ffefe3;
     }
 
@@ -148,6 +145,8 @@
         display: flex;
         width: 30%;
         height: 80%;
+        list-style: none;
+        padding-left: 20px;
     }
 
     .colorForWhat li > span {
@@ -164,7 +163,6 @@
         width: 100%;
         max-width: 800px;
         margin: 0 auto;
-        padding: 0 20px;
     }
 
     .el-form{
@@ -174,6 +172,10 @@
     .el-form-item{
         margin-bottom: 0px;
         border-bottom: solid 1px #E4E7ED;
+    }
+
+    .el-collapse{
+        text-align: left;
     }
 
     .mark1 {
