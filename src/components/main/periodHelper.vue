@@ -1,45 +1,132 @@
 <template>
     <div class="main">
-        <!--<div class="calendarContainer">-->
-            <!--<div class="calendarContent">-->
-                <!--<Calendar ref="Calendar"-->
-                          <!--:sundayStart="true"-->
-                          <!--:markDateMore="chooseDay"-->
-                          <!--v-on:choseDay="clickDay"-->
-                          <!--v-on:changeMonth="changeDate">-->
-                <!--</Calendar>-->
-            <!--</div>-->
-        <!--</div>-->
-        <!--<div class="colorForWhat">-->
-            <!--<li><span style="background: rgba(255,60,81,0.91)"></span>经期</li>-->
-            <!--<li><span style="background: rgba(255,60,81,0.53)"></span>预测经期</li>-->
-            <!--<li><span style="background: #ff83d3;"></span>排卵期</li>-->
-        <!--</div>-->
+        <div class="calendarContainer">
+            <div class="calendarContent">
+                <Calendar ref="Calendar"
+                          :sundayStart="true"
+                          :markDateMore="chooseDay"
+                          v-on:choseDay="clickDay"
+                          v-on:changeMonth="changeDate">
+                </Calendar>
+            </div>
+        </div>
+        <div class="colorForWhat">
+            <li><span style="background: rgba(255,60,81,0.91)"></span>经期</li>
+            <li><span style="background: rgba(255,60,81,0.53)"></span>预测经期</li>
+            <li><span style="background: #ff83d3;"></span>排卵期</li>
+        </div>
         <div class="todayDetailInfo" :visible.sync="todayDetailVisible">
-            <el-form ref="form" label-width="80px">
+            <el-form ref="form" :model="todayDetail" label-width="80px">
                 <el-form-item label="经期开始">
                     <el-switch v-model="todayDetail.isPeriodStart"></el-switch>
                 </el-form-item>
                 <el-form-item label="经期结束">
                     <el-switch v-model="todayDetail.isPeriodEnd"></el-switch>
                 </el-form-item>
-                <el-collapse>
-                    <el-collapse-item title="月经详情">
-                        <el-checkbox-group v-model="todayDetail.periodHurt">
-                            <el-checkbox-button label="轻度" value="1"></el-checkbox-button>
-                            <el-checkbox-button label="中度" value="2"></el-checkbox-button>
-                            <el-checkbox-button label="重度" value="3"></el-checkbox-button>
-                        </el-checkbox-group>
-                    </el-collapse-item>
-                </el-collapse>
                 <el-form-item label="爱爱">
                     <el-switch v-model="todayDetail.hasLove"></el-switch>
                 </el-form-item>
-                <el-form-item label="爱爱">
-                    <el-switch v-model="todayDetail.hasLove"></el-switch>
+                <el-form-item label="月经详情">
+                    <el-collapse>
+                        <el-collapse-item>
+                            <el-form-item label="痛经" style="border-bottom: 0px;">
+                                <el-radio-group v-model="todayDetail.periodHurt" size="mini">
+                                    <el-radio label="轻度" value="1"></el-radio>
+                                    <el-radio label="中度" value="2"></el-radio>
+                                    <el-radio label="重度" value="3"></el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                            <el-form-item label="流量" style="border-bottom: 0px;">
+                                <el-radio-group v-model="todayDetail.flowQuality" size="mini">
+                                    <el-radio label="很少" value="1"></el-radio>
+                                    <el-radio label="较少" value="2"></el-radio>
+                                    <el-radio label="平均" value="3"></el-radio>
+                                    <el-radio label="较多" value="4"></el-radio>
+                                    <el-radio label="很多" value="5"></el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                            <el-form-item label="血色" style="border-bottom: 0px;">
+                                <el-radio-group v-model="todayDetail.bloodColor" size="mini">
+                                    <el-radio label="很浅" value="1"></el-radio>
+                                    <el-radio label="较浅" value="2"></el-radio>
+                                    <el-radio label="中等" value="3"></el-radio>
+                                    <el-radio label="较深" value="4"></el-radio>
+                                    <el-radio label="很深" value="5"></el-radio>
+                                </el-radio-group>
+                            </el-form-item>
+                            <el-form-item label="经血" style="border-bottom: 0px;">
+                                <el-checkbox-group v-model="todayDetail.periodShape" size="mini">
+                                    <el-checkbox label="血块" value="1"></el-checkbox>
+                                    <el-checkbox label="异味" value="2"></el-checkbox>
+                                    <el-checkbox label="渣状" value="3"></el-checkbox>
+                                </el-checkbox-group>
+                            </el-form-item>
+                        </el-collapse-item>
+                    </el-collapse>
                 </el-form-item>
-                <el-form-item label="爱爱">
-                    <el-switch v-model="todayDetail.hasLove"></el-switch>
+                <el-form-item label="身体状况">
+                    <el-collapse>
+                        <el-collapse-item>
+                            <el-form-item label="头部" style="border-bottom: 0px;">
+                                <el-checkbox-group v-model="todayDetail.head" size="mini">
+                                    <el-checkbox label="头痛" value="1"></el-checkbox>
+                                    <el-checkbox label="眩晕" value="2"></el-checkbox>
+                                    <el-checkbox label="粉刺" value="3"></el-checkbox>
+                                    <el-checkbox label="发热" value="4"></el-checkbox>
+                                </el-checkbox-group>
+                            </el-form-item>
+                            <el-form-item label="身体" style="border-bottom: 0px;">
+                                <el-checkbox-group v-model="todayDetail.head" size="mini">
+                                    <el-checkbox label="乳房胀痛" value="1"></el-checkbox>
+                                    <el-checkbox label="身体酸痛" value="2"></el-checkbox>
+                                    <el-checkbox label="小腹坠胀" value="3"></el-checkbox>
+                                    <el-checkbox label="腹痛" value="4"></el-checkbox>
+                                    <el-checkbox label="腰酸" value="4"></el-checkbox>
+                                </el-checkbox-group>
+                            </el-form-item>
+                            <el-form-item label="私处" style="border-bottom: 0px;">
+                                <el-checkbox-group v-model="todayDetail.private" size="mini">
+                                    <el-checkbox label="瘙痒" value="1"></el-checkbox>
+                                    <el-checkbox label="异味" value="2"></el-checkbox>
+                                    <el-checkbox label="非经期出血" value="3"></el-checkbox>
+                                </el-checkbox-group>
+                            </el-form-item>
+                            <el-form-item label="白带" style="border-bottom: 0px;">
+                                <el-checkbox-group v-model="todayDetail.whitePip" size="mini">
+                                    <el-checkbox label="粘稠" value="1"></el-checkbox>
+                                    <el-checkbox label="拉丝" value="2"></el-checkbox>
+                                    <el-checkbox label="量多" value="3"></el-checkbox>
+                                    <el-checkbox label="渣状" value="4"></el-checkbox>
+                                    <el-checkbox label="块状" value="4"></el-checkbox>
+                                </el-checkbox-group>
+                            </el-form-item>
+                            <el-form-item label="肠胃" style="border-bottom: 0px;">
+                                <el-checkbox-group v-model="todayDetail.stomach" size="mini">
+                                    <el-checkbox label="贪冷饮" value="1"></el-checkbox>
+                                    <el-checkbox label="嗜辛辣" value="2"></el-checkbox>
+                                    <el-checkbox label="食欲不振" value="3"></el-checkbox>
+                                    <el-checkbox label="恶心" value="4"></el-checkbox>
+                                    <el-checkbox label="呕吐" value="5"></el-checkbox>
+                                    <el-checkbox label="腹泻" value="6"></el-checkbox>
+                                    <el-checkbox label="便秘" value="7"></el-checkbox>
+                                </el-checkbox-group>
+                            </el-form-item>
+                            <el-form-item label="心理" style="border-bottom: 0px;">
+                                <el-checkbox-group v-model="todayDetail.tought" size="mini">
+                                    <el-checkbox label="失眠" value="1"></el-checkbox>
+                                    <el-checkbox label="多梦" value="2"></el-checkbox>
+                                    <el-checkbox label="烦躁" value="3"></el-checkbox>
+                                </el-checkbox-group>
+                            </el-form-item>
+                        </el-collapse-item>
+                    </el-collapse>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-collapse>
+                        <el-collapse-item>
+                            <el-input type="textarea" v-model="todayDetail.note" placeholder="记录点其它的"></el-input>
+                        </el-collapse-item>
+                    </el-collapse>
                 </el-form-item>
             </el-form>
         </div>
@@ -56,7 +143,19 @@
 			return {
 				todayDetailVisible: false,
 				chooseDay: [],
-				todayDetail : {}
+				todayDetail : {
+					periodHurt:[],
+					flowQuality:[],
+					bloodColor:[],
+					periodShape:[],
+					head:[],
+                    body:[],
+					private:[],
+					whitePip:[],
+					stomach:[],
+                    tought:[],
+                    note:""
+                }
 			}
 		},
 		components: {
@@ -176,6 +275,46 @@
 
     .el-collapse{
         text-align: left;
+        border-top: 0px;
+        border-bottom: 0px;
+    }
+    .el-collapse-item__content{
+        padding: 0 20px;
+        padding-bottom: 25px;
+    }
+    .el-collapse-item__wrap{
+        margin-left: -99px;
+    }
+
+    .el-checkbox{
+        margin-left: 10px;
+    }
+
+    .el-checkbox+.el-checkbox{
+        margin-left: 10px;
+    }
+
+    .el-checkbox__label{
+        font-size:12px;
+        padding-left: 0px;
+    }
+
+    .el-radio{
+        margin-left: 10px !important;
+    }
+
+    .el-radio__label{
+        font-size:12px;
+        padding-left: 0px;
+    }
+
+    .el-textarea {
+        width: 84%;
+        padding-left: 40px;
+    }
+
+    .el-textarea__inner{
+        height: 150px;
     }
 
     .mark1 {
