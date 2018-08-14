@@ -1,5 +1,5 @@
 <template>
-    <div class="main">
+    <div class="main" v-loading="loading">
         <div class="calendarContainer">
             <div class="calendarContent">
                 <Calendar ref="Calendar"
@@ -11,11 +11,11 @@
             </div>
         </div>
         <div class="colorForWhat">
-            <li><span style="background: rgba(255,60,81,0.91)"></span>经期</li>
-            <li><span style="background: rgba(255,60,81,0.53)"></span>预测经期</li>
-            <li><span style="background: #ff83d3;"></span>排卵期</li>
+            <li><span style="background-color: rgba(255,60,81,0.91)"></span>经期</li>
+            <li><span style="background-color: rgba(255,60,81,0.53)"></span>预测经期</li>
+            <li><span style="background-color: #ff83d3;"></span>排卵期</li>
         </div>
-        <div class="todayDetailInfo" :visible.sync="todayDetailVisible">
+        <div class="todayDetailInfo" v-show="todayDetailVisible">
             <el-form ref="form" :model="todayDetail" label-width="80px">
                 <el-form-item label="经期开始">
                     <el-switch v-model="todayDetail.isPeriodStart"></el-switch>
@@ -85,7 +85,7 @@
                                 </el-checkbox-group>
                             </el-form-item>
                             <el-form-item label="私处" style="border-bottom: 0px;">
-                                <el-checkbox-group v-model="todayDetail.private" size="mini">
+                                <el-checkbox-group v-model="todayDetail.privateTh" size="mini">
                                     <el-checkbox label="瘙痒" value="1"></el-checkbox>
                                     <el-checkbox label="异味" value="2"></el-checkbox>
                                     <el-checkbox label="非经期出血" value="3"></el-checkbox>
@@ -132,56 +132,74 @@
         </div>
     </div>
 </template>
-
 <script>
 	import $ from 'jquery';
 	import Calendar from '../vue-calendar/index';
 	import timeUtil from '../vue-calendar/calendar';
+	import config from '../../util/config';
 
 	export default {
 		data() {
 			return {
+				loading: false,
 				todayDetailVisible: false,
 				chooseDay: [],
-				todayDetail : {
-					periodHurt:[],
-					flowQuality:[],
-					bloodColor:[],
-					periodShape:[],
-					head:[],
-                    body:[],
-					private:[],
-					whitePip:[],
-					stomach:[],
-                    tought:[],
-                    note:""
-                }
+				todayDetail: {
+					periodHurt: [],
+					flowQuality: [],
+					bloodColor: [],
+					periodShape: [],
+					head: [],
+					body: [],
+					privateTh: [],
+					whitePip: [],
+					stomach: [],
+					tought: [],
+					note: ""
+				}
 			}
 		},
 		components: {
 			Calendar
 		},
-        mounted : function () {
-            this.chooseDay = [{
-                date: '2018-8-6',
-                className: 'mark1'
-            },{
-                date: '2018-8-1',
-                className: 'mark2'
-            }]
-        },
+		mounted: function () {
+			this.getMouthRecord();
+		},
 		methods: {
-			queryFoodFunc: function () {
+			getMouthRecord: function (d) {
 				let self = this;
-				self.loading = true;
+				self.loading = false;
+				let params = timeUtil.getOneMouthStartEnd(d);
 				$.ajax({
 					type: "get",
-					dataType: 'jsonp',
-					url: "",
-				}).done(function (data) {
-
+					url: config.baseUrl + "/api/record/getMouthRecord",
+					data: params
+				}).done(function (result) {
+					self.loading = false;
+                    if(result.code === 200){
+	                    self.chooseDay = [];
+	                    const resultData = result.data;
+                        for(let i=0;i<resultData.length;i++){
+                            //1经期 2预测经期 3排卵期 4爱爱 5自定义
+                        	if(resultData[i].dayType === 1){
+		                        self.chooseDay.push({
+			                        "date": timeUtil.dateFormat(resultData[i].dayTime),
+			                        "className": 'periodTime'
+                                });
+                            }
+                        }
+                    }else{
+                        self.$message({
+                            message : "加载数据失败",
+                            type : "error"
+                        });
+                    }
 				}).fail(function () {
-
+					self.loading = false;
+					self.$message({
+						message : "加载数据失败",
+						type : "error"
+					});
 				});
 			},
 			openNext: function (id, data) {
@@ -191,31 +209,33 @@
 				console.log('选中了', data);
 				this.$message('选中了' + data);
 				const today = new Date();
-				if(timeUtil.compareDate(data,today)){
+				if (timeUtil.compareDate(data, today)) {
 					this.$message('无法编辑未来');
-                }else {
+					this.todayDetailVisible = false;
+				} else {
 					this.todayDetailVisible = true;
-                }
+				}
 			},
 			changeDate(data) {
 				this.$message('切换到的月份为' + data);
 				console.log('左右点击切换月份', data);
-				//切换月份
+				this.getMouthRecord(data);
 			},
 			jumpTo(date) {
 				this.$refs.Calendar.ChoseMonth(date);
-			}
+			},
+
 		}
 	}
 </script>
 <style>
-    .main{
+    .main {
         width: 100%;
         height: 100%;
         background: #f05c7000;
     }
 
-    .calendarContainer{
+    .calendarContainer {
         width: 100%;
         max-width: 800px;
         height: 50%;
@@ -223,7 +243,7 @@
         margin: 0 auto;
     }
 
-    .calendarContent{
+    .calendarContent {
         width: 100%;
         height: 100%;
         background: #dedede;
@@ -231,7 +251,7 @@
         margin: 0 auto;
     }
 
-    .colorForWhat{
+    .colorForWhat {
         width: 100%;
         height: 20px;
         max-width: 800px;
@@ -240,7 +260,7 @@
         background: #ffefe3;
     }
 
-    .colorForWhat li{
+    .colorForWhat li {
         display: flex;
         width: 30%;
         height: 80%;
@@ -258,53 +278,55 @@
         cursor: pointer;
     }
 
-    .todayDetailInfo{
+    .todayDetailInfo {
         width: 100%;
         max-width: 800px;
         margin: 0 auto;
     }
 
-    .el-form{
+    .el-form {
         margin-top: 10px;
     }
 
-    .el-form-item{
+    .el-form-item {
         margin-bottom: 0px;
         border-bottom: solid 1px #E4E7ED;
     }
 
-    .el-collapse{
+    .el-collapse {
         text-align: left;
         border-top: 0px;
         border-bottom: 0px;
     }
-    .el-collapse-item__content{
+
+    .el-collapse-item__content {
         padding: 0 20px;
         padding-bottom: 25px;
     }
-    .el-collapse-item__wrap{
+
+    .el-collapse-item__wrap {
         margin-left: -99px;
     }
 
-    .el-checkbox{
+    .el-checkbox {
         margin-left: 10px;
     }
 
-    .el-checkbox+.el-checkbox{
+    .el-checkbox + .el-checkbox {
         margin-left: 10px;
     }
 
-    .el-checkbox__label{
-        font-size:12px;
+    .el-checkbox__label {
+        font-size: 12px;
         padding-left: 0px;
     }
 
-    .el-radio{
+    .el-radio {
         margin-left: 10px !important;
     }
 
-    .el-radio__label{
-        font-size:12px;
+    .el-radio__label {
+        font-size: 12px;
         padding-left: 0px;
     }
 
@@ -313,16 +335,25 @@
         padding-left: 40px;
     }
 
-    .el-textarea__inner{
+    .el-textarea__inner {
         height: 150px;
     }
 
-    .mark1 {
-        background-color: #59ff4c;
+    /****不同类型的日期颜色不一样*****
+    ****
+    ****
+    ******************************/
+    .periodTime {
+        background-color: rgba(255,60,81,0.91);
         border-radius: 90px;
     }
 
-    .mark2 {
+    .forcastPeriodTime {
+        background-color: rgba(255,60,81,0.53);
+        border-radius: 90px;
+    }
+
+    .ovulatoryTime{
         background-color: #ff83d3;
         border-radius: 90px;
     }

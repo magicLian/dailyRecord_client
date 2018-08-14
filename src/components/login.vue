@@ -121,7 +121,7 @@
 					$.ajax({
 						type: "post",
 						dataType: 'json',
-						url: "/api/index/checkLogin",
+						url: config.baseUrl+"/api/index/checkLogin",
 						data: that.login,
 					}).done(function (result) {
 						that.loading = false;
