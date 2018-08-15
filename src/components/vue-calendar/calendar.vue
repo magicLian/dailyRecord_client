@@ -105,20 +105,11 @@
         transform: rotate(45deg);
     }
 
-    .wh_content_item > .wh_isMark {
-        margin: auto;
-        border-radius: 100px;
-        background: blue;
-        z-index: 2;
-    }
     .wh_content_item .wh_other_dayhide {
         color: #bfbfbf;
         border-radius: 100px;
     }
-    .wh_content_item .wh_want_dayhide {
-        color: #bfbfbf;
-        border-radius: 100px;
-    }
+
     .wh_content_item .wh_isToday {
         background: #ff836b;
         border-radius: 90px;
