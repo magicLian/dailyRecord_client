@@ -141,7 +141,7 @@
                 </div>
             </div>
             <div class="wh_content" style="height: calc(100% - 87px);">
-                <div class="wh_content_item" v-for="(item,index) in list" @click="window.event.preventDefault();">
+                <div class="wh_content_item" v-for="(item,index) in list">
                     <div class="wh_item_date"  @click="clickDay(item,index)"
                          v-bind:class="[{ wh_isMark: item.isMark},{wh_other_dayhide:item.otherMonth!=='nowMonth'},{wh_want_dayhide:item.dayHide},{wh_isToday:item.isToday},{wh_chose_day:item.chooseDay},setClass(item)]">
                         {{item.id}}

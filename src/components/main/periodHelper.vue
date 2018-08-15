@@ -6,7 +6,7 @@
                           :sundayStart="true"
                           :markDateMore="showDay"
                           v-on:choseDay="clickDay"
-                          v-on:changeMonth="changeDate">
+                          v-on:changeMonth="changeMouth">
                 </Calendar>
             </div>
         </div>
@@ -31,34 +31,34 @@
                         <el-collapse-item>
                             <el-form-item label="痛经" style="border-bottom: 0px;">
                                 <el-radio-group v-model="todayDetail.periodHurt" size="mini">
-                                    <el-radio label="轻度" value="1"></el-radio>
-                                    <el-radio label="中度" value="2"></el-radio>
-                                    <el-radio label="重度" value="3"></el-radio>
+                                    <el-radio label="1">轻度</el-radio>
+                                    <el-radio label="2">中度</el-radio>
+                                    <el-radio label="3">重度</el-radio>
                                 </el-radio-group>
                             </el-form-item>
                             <el-form-item label="流量" style="border-bottom: 0px;">
                                 <el-radio-group v-model="todayDetail.flowQuality" size="mini">
-                                    <el-radio label="很少" value="1"></el-radio>
-                                    <el-radio label="较少" value="2"></el-radio>
-                                    <el-radio label="平均" value="3"></el-radio>
-                                    <el-radio label="较多" value="4"></el-radio>
-                                    <el-radio label="很多" value="5"></el-radio>
+                                    <el-radio label="1">很少</el-radio>
+                                    <el-radio label="2">较少</el-radio>
+                                    <el-radio label="3">平均</el-radio>
+                                    <el-radio label="4">较多</el-radio>
+                                    <el-radio label="5">很多</el-radio>
                                 </el-radio-group>
                             </el-form-item>
                             <el-form-item label="血色" style="border-bottom: 0px;">
                                 <el-radio-group v-model="todayDetail.bloodColor" size="mini">
-                                    <el-radio label="很浅" value="1"></el-radio>
-                                    <el-radio label="较浅" value="2"></el-radio>
-                                    <el-radio label="中等" value="3"></el-radio>
-                                    <el-radio label="较深" value="4"></el-radio>
-                                    <el-radio label="很深" value="5"></el-radio>
+                                    <el-radio label="1">很浅</el-radio>
+                                    <el-radio label="2">较浅</el-radio>
+                                    <el-radio label="3">中等</el-radio>
+                                    <el-radio label="4">较深</el-radio>
+                                    <el-radio label="5">很深</el-radio>
                                 </el-radio-group>
                             </el-form-item>
                             <el-form-item label="经血" style="border-bottom: 0px;">
                                 <el-checkbox-group v-model="todayDetail.periodShape" size="mini">
-                                    <el-checkbox label="血块" value="1"></el-checkbox>
-                                    <el-checkbox label="异味" value="2"></el-checkbox>
-                                    <el-checkbox label="渣状" value="3"></el-checkbox>
+                                    <el-checkbox label="1">血块</el-checkbox>
+                                    <el-checkbox label="2">异味</el-checkbox>
+                                    <el-checkbox label="3">渣状</el-checkbox>
                                 </el-checkbox-group>
                             </el-form-item>
                         </el-collapse-item>
@@ -69,53 +69,53 @@
                         <el-collapse-item>
                             <el-form-item label="头部" style="border-bottom: 0px;">
                                 <el-checkbox-group v-model="todayDetail.head" size="mini">
-                                    <el-checkbox label="头痛" value="1"></el-checkbox>
-                                    <el-checkbox label="眩晕" value="2"></el-checkbox>
-                                    <el-checkbox label="粉刺" value="3"></el-checkbox>
-                                    <el-checkbox label="发热" value="4"></el-checkbox>
+                                    <el-checkbox label="1">头痛</el-checkbox>
+                                    <el-checkbox label="2">眩晕</el-checkbox>
+                                    <el-checkbox label="3">粉刺</el-checkbox>
+                                    <el-checkbox label="4">发热</el-checkbox>
                                 </el-checkbox-group>
                             </el-form-item>
                             <el-form-item label="身体" style="border-bottom: 0px;">
-                                <el-checkbox-group v-model="todayDetail.head" size="mini">
-                                    <el-checkbox label="乳房胀痛" value="1"></el-checkbox>
-                                    <el-checkbox label="身体酸痛" value="2"></el-checkbox>
-                                    <el-checkbox label="小腹坠胀" value="3"></el-checkbox>
-                                    <el-checkbox label="腹痛" value="4"></el-checkbox>
-                                    <el-checkbox label="腰酸" value="4"></el-checkbox>
+                                <el-checkbox-group v-model="todayDetail.body" size="mini">
+                                    <el-checkbox label="1">乳房胀痛</el-checkbox>
+                                    <el-checkbox label="2">身体酸痛</el-checkbox>
+                                    <el-checkbox label="3">小腹坠胀</el-checkbox>
+                                    <el-checkbox label="4">腹痛</el-checkbox>
+                                    <el-checkbox label="5">腰酸</el-checkbox>
                                 </el-checkbox-group>
                             </el-form-item>
                             <el-form-item label="私处" style="border-bottom: 0px;">
                                 <el-checkbox-group v-model="todayDetail.privateTh" size="mini">
-                                    <el-checkbox label="瘙痒" value="1"></el-checkbox>
-                                    <el-checkbox label="异味" value="2"></el-checkbox>
-                                    <el-checkbox label="非经期出血" value="3"></el-checkbox>
+                                    <el-checkbox label="1">瘙痒</el-checkbox>
+                                    <el-checkbox label="2">异味</el-checkbox>
+                                    <el-checkbox label="3">非经期出血</el-checkbox>
                                 </el-checkbox-group>
                             </el-form-item>
                             <el-form-item label="白带" style="border-bottom: 0px;">
                                 <el-checkbox-group v-model="todayDetail.whitePip" size="mini">
-                                    <el-checkbox label="粘稠" value="1"></el-checkbox>
-                                    <el-checkbox label="拉丝" value="2"></el-checkbox>
-                                    <el-checkbox label="量多" value="3"></el-checkbox>
-                                    <el-checkbox label="渣状" value="4"></el-checkbox>
-                                    <el-checkbox label="块状" value="4"></el-checkbox>
+                                    <el-checkbox label="1">粘稠</el-checkbox>
+                                    <el-checkbox label="2">拉丝</el-checkbox>
+                                    <el-checkbox label="3">量多</el-checkbox>
+                                    <el-checkbox label="4">渣状</el-checkbox>
+                                    <el-checkbox label="5">块状</el-checkbox>
                                 </el-checkbox-group>
                             </el-form-item>
                             <el-form-item label="肠胃" style="border-bottom: 0px;">
                                 <el-checkbox-group v-model="todayDetail.stomach" size="mini">
-                                    <el-checkbox label="贪冷饮" value="1"></el-checkbox>
-                                    <el-checkbox label="嗜辛辣" value="2"></el-checkbox>
-                                    <el-checkbox label="食欲不振" value="3"></el-checkbox>
-                                    <el-checkbox label="恶心" value="4"></el-checkbox>
-                                    <el-checkbox label="呕吐" value="5"></el-checkbox>
-                                    <el-checkbox label="腹泻" value="6"></el-checkbox>
-                                    <el-checkbox label="便秘" value="7"></el-checkbox>
+                                    <el-checkbox label="1">贪冷饮</el-checkbox>
+                                    <el-checkbox label="2">嗜辛辣</el-checkbox>
+                                    <el-checkbox label="3">食欲不振</el-checkbox>
+                                    <el-checkbox label="4">恶心</el-checkbox>
+                                    <el-checkbox label="5">呕吐</el-checkbox>
+                                    <el-checkbox label="6">腹泻</el-checkbox>
+                                    <el-checkbox label="7">便秘</el-checkbox>
                                 </el-checkbox-group>
                             </el-form-item>
                             <el-form-item label="心理" style="border-bottom: 0px;">
                                 <el-checkbox-group v-model="todayDetail.tought" size="mini">
-                                    <el-checkbox label="失眠" value="1"></el-checkbox>
-                                    <el-checkbox label="多梦" value="2"></el-checkbox>
-                                    <el-checkbox label="烦躁" value="3"></el-checkbox>
+                                    <el-checkbox label="1">失眠</el-checkbox>
+                                    <el-checkbox label="2">多梦</el-checkbox>
+                                    <el-checkbox label="3">烦躁</el-checkbox>
                                 </el-checkbox-group>
                             </el-form-item>
                         </el-collapse-item>
@@ -128,6 +128,7 @@
                         </el-collapse-item>
                     </el-collapse>
                 </el-form-item>
+                <el-button type="primary" round  @click="saveClickDayInfo" style="margin: 20px auto">保存当天信息</el-button>
             </el-form>
         </div>
     </div>
@@ -151,9 +152,9 @@
                     hasLove:false,
                     isPeriodStart:false,
 					isPeriodEnd:false,
-					periodHurt: [],
-					flowQuality: [],
-					bloodColor: [],
+					periodHurt: '',
+					flowQuality: '',
+					bloodColor: '',
 					periodShape: [],
 					head: [],
 					body: [],
@@ -208,9 +209,6 @@
 					});
 				});
 			},
-			openNext: function (id, data) {
-				this.dialogVisible = true;
-			},
 			clickDay(data) {
 				this.$message('选中了' + data);
 				this.todayDetail.dayTime = data;
@@ -223,7 +221,7 @@
 					this.getClickDayInfo();
 				}
 			},
-			changeDate(data) {
+			changeMouth(data) {
 				this.$message('切换到的月份为' + data);
 				console.log('左右点击切换月份', data);
 				this.getMouthRecord(data);
@@ -263,6 +261,7 @@
 			saveClickDayInfo : function () {
 				let self = this;
 				self.loading = false;
+				console.log(self.todayDetail);
 				$.ajax({
 					type: "get",
 					url: config.baseUrl + "/api/record/setMouthRecord",
@@ -291,10 +290,23 @@
 				});
 			},
             formateJavaDayDataToVue : function (data) {
+                this.todayDetail.id = data.id;
+                this.todayDetail.dayType = data.dayType;
                 this.todayDetail.dayTime = timeUtil.dateFormat(data.dayTime);
 	            this.todayDetail.hasLove = data.hasLove === 1;
 	            this.todayDetail.isPeriodStart = data.isPeriodStart === 1;
 	            this.todayDetail.isPeriodEnd = data.isPeriodEnd === 1;
+                this.todayDetail.periodHurt = data.periodHurt === null ? '' : data.periodHurt;
+                this.todayDetail.flowQuality = data.flowQuality === null ? '' : data.flowQuality;
+                this.todayDetail.bloodColor = data.bloodColor === null ? '' : data.bloodColor;
+                this.todayDetail.periodShape = data.periodShape === null ? [] : data.periodShape;
+                this.todayDetail.head = data.head === null ? [] : data.head;
+                this.todayDetail.body = data.body === null ? [] : data.body;
+                this.todayDetail.privateTh = data.privateTh === null ? [] : data.privateTh;
+                this.todayDetail.whitePip = data.whitePip === null ? [] : data.whitePip;
+                this.todayDetail.stomach = data.stomach === null ? [] : data.stomach;
+                this.todayDetail.tought = data.tought === null ? [] : data.tought;
+                this.todayDetail.note = data.note === null ? '': data.note;
             }
 		}
 	}
