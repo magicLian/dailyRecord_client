@@ -73,11 +73,13 @@
         height: 50px;
         text-align: center;
         color: #252525;
+        vertical-align:middle;
+        display:inline-block;
     }
 
     .wh_item_date {
-        width: 50px;
-        height: 50px;
+        width: 35px;
+        height: 35px;
         margin: auto;
         display: flex;
         justify-content: center;
@@ -87,9 +89,9 @@
     .wh_content_item:hover .wh_item_date{
         cursor: pointer;
         border-radius: 100px;
-        border: 3px solid #6db6dd;
-        width: 44px;
-        height: 44px;
+        border: 2px solid #6db6dd;
+        width: 31px;
+        height: 31px;
     }
 
     .wh_jiantou1 {
@@ -131,9 +133,9 @@
     }
     .wh_content_item .wh_chose_day {
         border-radius: 100px;
-        border: 3px solid #6db6dd;
-        width: 44px;
-        height: 44px;
+        border: 2px solid #6db6dd;
+        width: 31px;
+        height: 31px;
     }
 </style>
 <template>
@@ -156,8 +158,8 @@
                 </div>
             </div>
             <div class="wh_content" style="height: calc(100% - 87px);">
-                <div class="wh_content_item" v-for="(item,index) in list" @click="clickDay(item,index)">
-                    <div class="wh_item_date"
+                <div class="wh_content_item" v-for="(item,index) in list">
+                    <div class="wh_item_date"  @click="clickDay(item,index)"
                          v-bind:class="[{ wh_isMark: item.isMark},{wh_other_dayhide:item.otherMonth!=='nowMonth'},{wh_want_dayhide:item.dayHide},{wh_isToday:item.isToday},{wh_chose_day:item.chooseDay},setClass(item)]">
                         {{item.id}}
                     </div>

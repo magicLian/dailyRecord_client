@@ -4,7 +4,7 @@
             <div class="calendarContent">
                 <Calendar ref="Calendar"
                           :sundayStart="true"
-                          :markDateMore="chooseDay"
+                          :markDateMore="showDay"
                           v-on:choseDay="clickDay"
                           v-on:changeMonth="changeDate">
                 </Calendar>
@@ -143,8 +143,14 @@
 			return {
 				loading: false,
 				todayDetailVisible: false,
-				chooseDay: [],
+				showDay: [],
 				todayDetail: {
+					id:'',
+					dayTime:'',
+                    dayType:'',
+                    hasLove:false,
+                    isPeriodStart:false,
+					isPeriodEnd:false,
 					periodHurt: [],
 					flowQuality: [],
 					bloodColor: [],
@@ -177,12 +183,12 @@
 				}).done(function (result) {
 					self.loading = false;
                     if(result.code === 200){
-	                    self.chooseDay = [];
+	                    self.showDay = [];
 	                    const resultData = result.data;
                         for(let i=0;i<resultData.length;i++){
                             //1经期 2预测经期 3排卵期 4爱爱 5自定义
                         	if(resultData[i].dayType === 1){
-		                        self.chooseDay.push({
+		                        self.showDay.push({
 			                        "date": timeUtil.dateFormat(resultData[i].dayTime),
 			                        "className": 'periodTime'
                                 });
@@ -206,14 +212,15 @@
 				this.dialogVisible = true;
 			},
 			clickDay(data) {
-				console.log('选中了', data);
 				this.$message('选中了' + data);
+				this.todayDetail.dayTime = data;
 				const today = new Date();
 				if (timeUtil.compareDate(data, today)) {
 					this.$message('无法编辑未来');
 					this.todayDetailVisible = false;
 				} else {
 					this.todayDetailVisible = true;
+					this.getClickDayInfo();
 				}
 			},
 			changeDate(data) {
@@ -224,7 +231,71 @@
 			jumpTo(date) {
 				this.$refs.Calendar.ChoseMonth(date);
 			},
-
+            getClickDayInfo : function () {
+	            let self = this;
+	            self.loading = false;
+	            $.ajax({
+		            type: "get",
+		            url: config.baseUrl + "/api/record/getDayTimeRecord",
+		            data: {
+		            	'dayTime' : self.todayDetail.dayTime
+                    }
+	            }).done(function (result) {
+		            self.loading = false;
+		            if(result.code === 200){
+			            self.todayDetail = result.data;
+			            self.formateJavaDayDataToVue(result.data);
+                        console.log(self.todayDetail);
+		            }else{
+			            self.$message({
+				            message : "查询数据失败",
+				            type : "error"
+			            });
+		            }
+	            }).fail(function () {
+		            self.loading = false;
+		            self.$message({
+			            message : "查询数据失败",
+			            type : "error"
+		            });
+	            });
+            },
+			saveClickDayInfo : function () {
+				let self = this;
+				self.loading = false;
+				$.ajax({
+					type: "get",
+					url: config.baseUrl + "/api/record/setMouthRecord",
+					data: {
+						'record' : self.todayDetail
+                    }
+				}).done(function (result) {
+					self.loading = false;
+					if(result.code === 200){
+						self.$message({
+							message : "保存数据成功",
+							type : "success"
+						});
+					}else{
+						self.$message({
+							message : "保存数据失败",
+							type : "error"
+						});
+					}
+				}).fail(function () {
+					self.loading = false;
+					self.$message({
+						message : "保存数据失败",
+						type : "error"
+					});
+				});
+			},
+            formateJavaDayDataToVue : function (data) {
+                this.todayDetail.dayTime = timeUtil.dateFormat(data.dayTime);
+	            this.todayDetail.hasLove = data.hasLove === 1;
+	            this.todayDetail.isPeriodStart = data.isPeriodStart === 1;
+	            this.todayDetail.isPeriodEnd = data.isPeriodEnd === 1;
+            }
 		}
 	}
 </script>
