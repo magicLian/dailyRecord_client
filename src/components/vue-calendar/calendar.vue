@@ -1,4 +1,4 @@
-<style>
+<style xmlns:v-bind="http://www.w3.org/1999/xhtml" xmlns:v-bind="http://www.w3.org/1999/xhtml">
     * {
         margin: 0;
         padding: 0;
@@ -86,14 +86,6 @@
         align-items: center;
     }
 
-    .wh_content_item:hover .wh_item_date{
-        cursor: pointer;
-        border-radius: 100px;
-        border: 2px solid #6db6dd;
-        width: 31px;
-        height: 31px;
-    }
-
     .wh_jiantou1 {
         width: 12px;
         height: 12px;
@@ -158,7 +150,7 @@
                 </div>
             </div>
             <div class="wh_content" style="height: calc(100% - 87px);">
-                <div class="wh_content_item" v-for="(item,index) in list">
+                <div class="wh_content_item" v-for="(item,index) in list" @click="window.event.preventDefault();">
                     <div class="wh_item_date"  @click="clickDay(item,index)"
                          v-bind:class="[{ wh_isMark: item.isMark},{wh_other_dayhide:item.otherMonth!=='nowMonth'},{wh_want_dayhide:item.dayHide},{wh_isToday:item.isToday},{wh_chose_day:item.chooseDay},setClass(item)]">
                         {{item.id}}
