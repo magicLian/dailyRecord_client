@@ -241,7 +241,6 @@
 	            }).done(function (result) {
 		            self.loading = false;
 		            if(result.code === 200){
-			            self.todayDetail = result.data;
 			            self.formateJavaDayDataToVue(result.data);
                         console.log(self.todayDetail);
 		            }else{
@@ -261,13 +260,11 @@
 			saveClickDayInfo : function () {
 				let self = this;
 				self.loading = false;
-				console.log(self.todayDetail);
 				$.ajax({
-					type: "get",
-					url: config.baseUrl + "/api/record/setMouthRecord",
-					data: {
-						'record' : self.todayDetail
-                    }
+					type: "POST",
+					url: config.baseUrl + "/api/record/setDayRecord",
+					contentType :'application/json;charse=UTF-8',
+					data: JSON.stringify(self.formateVueDayDataToJava(self.todayDetail))
 				}).done(function (result) {
 					self.loading = false;
 					if(result.code === 200){
@@ -299,14 +296,28 @@
                 this.todayDetail.periodHurt = data.periodHurt === null ? '' : data.periodHurt;
                 this.todayDetail.flowQuality = data.flowQuality === null ? '' : data.flowQuality;
                 this.todayDetail.bloodColor = data.bloodColor === null ? '' : data.bloodColor;
-                this.todayDetail.periodShape = data.periodShape === null ? [] : data.periodShape;
-                this.todayDetail.head = data.head === null ? [] : data.head;
-                this.todayDetail.body = data.body === null ? [] : data.body;
-                this.todayDetail.privateTh = data.privateTh === null ? [] : data.privateTh;
-                this.todayDetail.whitePip = data.whitePip === null ? [] : data.whitePip;
-                this.todayDetail.stomach = data.stomach === null ? [] : data.stomach;
-                this.todayDetail.tought = data.tought === null ? [] : data.tought;
+                this.todayDetail.periodShape = data.periodShape === null ? [] : JSON.parse(data.periodShape);
+                this.todayDetail.head = data.head === null ? [] : JSON.parse(data.head);
+                this.todayDetail.body = data.body === null ? [] : JSON.parse(data.body);
+                this.todayDetail.privateTh = data.privateTh === null ? [] : JSON.parse(data.privateTh);
+                this.todayDetail.whitePip = data.whitePip === null ? [] : JSON.parse(data.whitePip);
+                this.todayDetail.stomach = data.stomach === null ? [] : JSON.parse(data.stomach);
+                this.todayDetail.tought = data.tought === null ? [] : JSON.parse(data.tought);
                 this.todayDetail.note = data.note === null ? '': data.note;
+            },
+            formateVueDayDataToJava : function (data) {
+				let returnData = $.extend(true, {}, data);
+	            returnData.periodShape = JSON.stringify(returnData.periodShape);
+	            returnData.head = JSON.stringify(returnData.head);
+	            returnData.body = JSON.stringify(returnData.body);
+	            returnData.privateTh = JSON.stringify(returnData.privateTh);
+	            returnData.whitePip = JSON.stringify(returnData.whitePip);
+	            returnData.stomach = JSON.stringify(returnData.stomach);
+	            returnData.tought = JSON.stringify(returnData.tought);
+	            returnData.hasLove = returnData.hasLove === true ? 1:0;
+	            returnData.isPeriodStart = returnData.isPeriodStart === true ? 1:0;
+	            returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1:0;
+	            return returnData;
             }
 		}
 	}
