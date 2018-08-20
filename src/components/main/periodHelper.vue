@@ -128,7 +128,7 @@
                         </el-collapse-item>
                     </el-collapse>
                 </el-form-item>
-                <el-button type="primary" round  @click="" style="margin: 20px auto">保存当天信息</el-button>
+                <el-button type="primary" round @click="" style="margin: 20px auto">保存当天信息</el-button>
             </el-form>
         </div>
     </div>
@@ -138,6 +138,7 @@
 	import Calendar from '../vue-calendar/index';
 	import timeUtil from '../vue-calendar/calendar';
 	import config from '../../util/config';
+	import utils from '../../util/utils';
 
 	export default {
 		data() {
@@ -145,15 +146,15 @@
 				loading: false,
 				todayDetailVisible: false,
 				showDay: [],
-                showDaysHistory:{},
-				currMouthRecordList : [],
+				showDaysHistory: {},
+				currMouthRecordList: [],
 				todayDetail: {
-					id:'',
-					dayTime:'',
-					dayType:'',
-					hasLove:false,
-					isPeriodStart:false,
-					isPeriodEnd:false,
+					id: '',
+					dayTime: '',
+					dayType: '',
+					hasLove: false,
+					isPeriodStart: false,
+					isPeriodEnd: false,
 					periodHurt: '',
 					flowQuality: '',
 					bloodColor: '',
@@ -180,31 +181,31 @@
 				let self = this;
 				self.loading = false;
 				let params = {
-					start : self.$refs.Calendar.list[0].date,
-                    end : self.$refs.Calendar.list[self.$refs.Calendar.list.length -1].date,
-                    "dateTop" : self.$refs.Calendar.dateTop
-                };
+					start: self.$refs.Calendar.list[0].date,
+					end: self.$refs.Calendar.list[self.$refs.Calendar.list.length - 1].date,
+					"dateTop": self.$refs.Calendar.dateTop
+				};
 				$.ajax({
 					type: "get",
 					url: config.baseUrl + "/api/record/getMouthRecord",
 					data: params
 				}).done(function (result) {
 					self.loading = false;
-                    if(result.code === 200){
-	                    self.showDay = [];
-	                    self.currMouthRecordList = result.data;
-	                    self.displayChooseMouthClassName(result.data);
-                    }else{
-                        self.$message({
-                            message : "加载数据失败",
-                            type : "error"
-                        });
-                    }
+					if (result.code === 200) {
+						self.showDay = [];
+						self.currMouthRecordList = result.data;
+						self.displayChooseMouthClassName(result.data);
+					} else {
+						self.$message({
+							message: "加载数据失败",
+							type: "error"
+						});
+					}
 				}).fail(function () {
 					self.loading = false;
 					self.$message({
-						message : "加载数据失败",
-						type : "error"
+						message: "加载数据失败",
+						type: "error"
 					});
 				});
 			},
@@ -223,92 +224,117 @@
 			changeMouth(data) {
 				this.$message('切换到的月份为' + data);
 				this.addShowMouthHistory();
-				this.getMouthRecord(data);
+				const today = new Date();
+				if (timeUtil.compareDate(data, today)) {
+					this.todayDetailVisible = false;
+					this.forcastFunture('afterMouth');
+				} else {
+					this.todayDetailVisible = true;
+					this.getMouthRecord(data);
+				}
 			},
-            getClickDayInfo : function (data) {
-                for(let i=0;i<this.currMouthList.length;i++){
-                	if(this.currMouthList[i].date === data){
-		                this.todayDetail = this.currMouthList[i].todayDetail;
-                		break;
-                    }
-                }
+			getClickDayInfo: function (data) {
+				//从大历史对象中获取点击那天的记录
+				let dateTop = this.$refs.Calendar.dateTop;
+				let mouthShowList = this.showDaysHistory[dateTop];
+				for (let i = 0; i < mouthShowList.length; i++) {
+					if (mouthShowList[i].date === data) {
+						this.todayDetail = mouthShowList[i].todayDetail;
+						break;
+					}
+				}
+			},
+			formateJavaDayDataToVue: function (data) {
+				let todayDetail = {};
+				todayDetail.id = data.id;
+				todayDetail.dayType = data.dayType;
+				todayDetail.dayTime = timeUtil.dateFormat(data.dayTime);
+				todayDetail.hasLove = data.hasLove === 1;
+				todayDetail.isPeriodStart = data.isPeriodStart === 1;
+				todayDetail.isPeriodEnd = data.isPeriodEnd === 1;
+				todayDetail.periodHurt = data.periodHurt === null ? '' : data.periodHurt;
+				todayDetail.flowQuality = data.flowQuality === null ? '' : data.flowQuality;
+				todayDetail.bloodColor = data.bloodColor === null ? '' : data.bloodColor;
+				todayDetail.periodShape = data.periodShape === null ? [] : JSON.parse(data.periodShape);
+				todayDetail.head = data.head === null ? [] : JSON.parse(data.head);
+				todayDetail.body = data.body === null ? [] : JSON.parse(data.body);
+				todayDetail.privateTh = data.privateTh === null ? [] : JSON.parse(data.privateTh);
+				todayDetail.whitePip = data.whitePip === null ? [] : JSON.parse(data.whitePip);
+				todayDetail.stomach = data.stomach === null ? [] : JSON.parse(data.stomach);
+				todayDetail.tought = data.tought === null ? [] : JSON.parse(data.tought);
+				todayDetail.note = data.note === null ? '' : data.note;
+				return todayDetail;
+			},
+			formateVueDayDataToJava: function (data) {
+				let returnData = utils.clone(data);
+				returnData.periodShape = JSON.stringify(returnData.periodShape);
+				returnData.head = JSON.stringify(returnData.head);
+				returnData.body = JSON.stringify(returnData.body);
+				returnData.privateTh = JSON.stringify(returnData.privateTh);
+				returnData.whitePip = JSON.stringify(returnData.whitePip);
+				returnData.stomach = JSON.stringify(returnData.stomach);
+				returnData.tought = JSON.stringify(returnData.tought);
+				returnData.hasLove = returnData.hasLove === true ? 1 : 0;
+				returnData.isPeriodStart = returnData.isPeriodStart === true ? 1 : 0;
+				returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1 : 0;
+				return returnData;
+			},
+			addShowMouthHistory: function () {
+				let dateTop = this.$refs.Calendar.dateTop;
+				if (!this.showDaysHistory.dateTop) {
+					this.showDaysHistory[dateTop] = [];
+					let dateTopList = this.$refs.Calendar.list;
+					this.showDaysHistory[dateTop].push.apply(this.showDaysHistory[dateTop], this.$refs.Calendar.list);
+				}
+			},
+			displayChooseMouthClassName: function (mouthType) {
+                this.doShowClassName();
+                this.storeMouthRecordInHistoryList();
+			},
+			forcastFunture: function (mouthType) {
 
-            },
-            formateJavaDayDataToVue : function (data) {
-                this.todayDetail.id = data.id;
-                this.todayDetail.dayType = data.dayType;
-                this.todayDetail.dayTime = timeUtil.dateFormat(data.dayTime);
-	            this.todayDetail.hasLove = data.hasLove === 1;
-	            this.todayDetail.isPeriodStart = data.isPeriodStart === 1;
-	            this.todayDetail.isPeriodEnd = data.isPeriodEnd === 1;
-                this.todayDetail.periodHurt = data.periodHurt === null ? '' : data.periodHurt;
-                this.todayDetail.flowQuality = data.flowQuality === null ? '' : data.flowQuality;
-                this.todayDetail.bloodColor = data.bloodColor === null ? '' : data.bloodColor;
-                this.todayDetail.periodShape = data.periodShape === null ? [] : JSON.parse(data.periodShape);
-                this.todayDetail.head = data.head === null ? [] : JSON.parse(data.head);
-                this.todayDetail.body = data.body === null ? [] : JSON.parse(data.body);
-                this.todayDetail.privateTh = data.privateTh === null ? [] : JSON.parse(data.privateTh);
-                this.todayDetail.whitePip = data.whitePip === null ? [] : JSON.parse(data.whitePip);
-                this.todayDetail.stomach = data.stomach === null ? [] : JSON.parse(data.stomach);
-                this.todayDetail.tought = data.tought === null ? [] : JSON.parse(data.tought);
-                this.todayDetail.note = data.note === null ? '': data.note;
-            },
-            formateVueDayDataToJava : function (data) {
-				let returnData = $.extend(true, {}, data);
-	            returnData.periodShape = JSON.stringify(returnData.periodShape);
-	            returnData.head = JSON.stringify(returnData.head);
-	            returnData.body = JSON.stringify(returnData.body);
-	            returnData.privateTh = JSON.stringify(returnData.privateTh);
-	            returnData.whitePip = JSON.stringify(returnData.whitePip);
-	            returnData.stomach = JSON.stringify(returnData.stomach);
-	            returnData.tought = JSON.stringify(returnData.tought);
-	            returnData.hasLove = returnData.hasLove === true ? 1:0;
-	            returnData.isPeriodStart = returnData.isPeriodStart === true ? 1:0;
-	            returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1:0;
-	            return returnData;
-            },
-			addShowMouthHistory : function () {
-                let dateTop = this.$refs.Calendar.dateTop;
-                if(!this.showDaysHistory.dateTop){
-	                this.showDaysHistory[dateTop] = [];
-	                let dateTopList = this.$refs.Calendar.list;
-	                this.showDaysHistory[dateTop].push.apply(this.showDaysHistory[dateTop],this.$refs.Calendar.list);
-                }
-            },
-            displayChooseMouthClassName : function (mouthType) {
-				//如果是这月或者将来的某月，需要显示预测日期
-                if(mouthType === 'nowMouth' || mouthType === 'afterMouth'){
-                	this.doShowClassName();
-                    this.forcastFunture(mouthType);
-                }else {
-	                this.doShowClassName();
-                }
-		    },
-            forcastFunture : function (mouthType) {
-
-            },
-			doShowClassName : function () {
+			},
+			doShowClassName: function () {
 				//1经期 2预测经期 3排卵期 4自定义
-                const resultData = this.currMouthRecordList;
-				for(let i=0;i<resultData.length;i++){
-					if(resultData[i].dayType === 1){
+				const resultData = this.currMouthRecordList;
+				for (let i = 0; i < resultData.length; i++) {
+					if (resultData[i].dayType === 1) {
 						this.showDay.push({
 							"date": timeUtil.dateFormat(resultData[i].dayTime),
 							"className": 'periodTime'
 						});
 					}
-					if(resultData[i].dayType === 2){
+					if (resultData[i].dayType === 2) {
 						this.showDay.push({
 							"date": timeUtil.dateFormat(resultData[i].dayTime),
 							"className": 'forcastPeriodTime'
 						});
 					}
-					if(resultData[i].dayType === 3){
+					if (resultData[i].dayType === 3) {
 						this.showDay.push({
 							"date": timeUtil.dateFormat(resultData[i].dayTime),
 							"className": 'ovulatoryTime'
 						});
 					}
+				}
+			},
+			storeMouthRecordInHistoryList: function () {
+				let dateTop = this.$refs.Calendar.dateTop;
+				let mouthRecordList = this.currMouthRecordList;
+				let mouthShowList = this.showDaysHistory[dateTop];
+
+				if (mouthRecordList.length != 0) {
+					for (let i = 0; i < mouthRecordList.length; i++) {
+						let dataToVue = this.formateJavaDayDataToVue(mouthRecordList[i]);
+						for (let j = 0; j < mouthShowList.length; j++) {
+							if (mouthShowList[j].date === dataToVue.dayTime) {
+								mouthShowList[j].todayDetail = dataToVue;
+								break;
+							}
+						}
+					}
+				} else {
+					this.$message('没有查询到本月的记录');
 				}
 			}
 		}
@@ -430,16 +456,16 @@
     ****
     ******************************/
     .periodTime {
-        background-color: rgba(255,60,81,0.91);
+        background-color: rgba(255, 60, 81, 0.91);
         border-radius: 90px;
     }
 
     .forcastPeriodTime {
-        background-color: rgba(255,60,81,0.53);
+        background-color: rgba(255, 60, 81, 0.53);
         border-radius: 90px;
     }
 
-    .ovulatoryTime{
+    .ovulatoryTime {
         background-color: #ff83d3;
         border-radius: 90px;
     }
