@@ -143,7 +143,12 @@
             <div class="wh_content" style="height: calc(100% - 87px);">
                 <div class="wh_content_item" v-for="(item,index) in list">
                     <div class="wh_item_date"  @click="clickDay(item,index)"
-                         v-bind:class="[{ wh_isMark: item.isMark},{wh_other_dayhide:item.otherMonth!=='nowMonth'},{wh_want_dayhide:item.dayHide},{wh_isToday:item.isToday},{wh_chose_day:item.chooseDay},setClass(item)]">
+                         v-bind:class="[{wh_isMark: item.isMark},
+                         {wh_other_dayhide:item.otherMonth!=='nowMonth'},
+                         {wh_want_dayhide:item.dayHide},
+                         {wh_isToday:item.isToday},
+                         {wh_chose_day:item.chooseDay}
+                         ,setClass(item)]">
                         {{item.id}}
                     </div>
                 </div>
@@ -153,14 +158,33 @@
 </template>
 <script>
 	import timeUtil from './calendar';
+	import utils from '../../util/utils';
 	export default {
 		data() {
 			return {
 				textTop: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
 				myDate: [],
 				list: [],
-				historyChose: [],
-				dateTop: ''
+				dateTop: '',
+				todayDetail: {
+					id:'',
+					dayTime:'',
+					dayType:'',
+					hasLove:false,
+					isPeriodStart:false,
+					isPeriodEnd:false,
+					periodHurt: '',
+					flowQuality: '',
+					bloodColor: '',
+					periodShape: [],
+					head: [],
+					body: [],
+					privateTh: [],
+					whitePip: [],
+					stomach: [],
+					tought: [],
+					note: ""
+				}
 			};
 		},
 		props: {
@@ -210,32 +234,32 @@
 			ChoseMonth: function (date, isChosedDay = true) {
 				date = timeUtil.dateFormat(date);
 				this.myDate = new Date(date);
-				this.$emit('changeMonth', timeUtil.dateFormat(this.myDate));
 				if (isChosedDay) {
 					this.getList(this.myDate, date, isChosedDay);
 				} else {
 					this.getList(this.myDate);
 				}
+				this.$emit('changeMonth', this.dateTop);
 			},
 			PreMonth: function (date, isChosedDay = true) {
 				date = timeUtil.dateFormat(date);
 				this.myDate = timeUtil.getOtherMonth(this.myDate, 'preMonth');
-				this.$emit('changeMonth', timeUtil.dateFormat(this.myDate));
 				if (isChosedDay) {
 					this.getList(this.myDate, date, isChosedDay);
 				} else {
 					this.getList(this.myDate);
 				}
+				this.$emit('changeMonth', this.dateTop);
 			},
 			NextMonth: function (date, isChosedDay = true) {
 				date = timeUtil.dateFormat(date);
 				this.myDate = timeUtil.getOtherMonth(this.myDate, 'nextMonth');
-				this.$emit('changeMonth', timeUtil.dateFormat(this.myDate));
 				if (isChosedDay) {
 					this.getList(this.myDate, date, isChosedDay);
 				} else {
 					this.getList(this.myDate);
 				}
+				this.$emit('changeMonth', this.dateTop);
 			},
 			forMatArgs: function () {
 				let markDate = this.markDate;
@@ -251,38 +275,39 @@
 			},
 			getList: function (date, chooseDay, isChosedDay = true) {
 				const [markDate, markDateMore] = this.forMatArgs();
-				this.dateTop = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+				this.dateTop = `${date.getFullYear()}-${date.getMonth() + 1}`;
 				let arr = timeUtil.getMonthList(this.myDate);
 				for (let i = 0; i < arr.length; i++) {
 					let markClassName = '';
 					let k = arr[i];
 					k.chooseDay = false;
 					const nowTime = k.date;
-					const t = new Date(nowTime).getTime() / 1000;
+
 					//看每一天的class
 					for (const c of markDateMore) {
 						if (c.date === nowTime) {
 							markClassName = c.className || '';
 						}
 					}
+
 					//标记选中某些天 设置class
 					k.markClassName = markClassName;
-					k.isMark = markDate.indexOf(nowTime) > -1;
-					//无法选中某天
-					k.dayHide = t < this.agoDayHide || t > this.futureDayHide;
+
 					if (k.isToday) {
 						this.$emit('isToday', nowTime);
 					}
-					let flag = !k.dayHide && k.otherMonth === 'nowMonth';
-					if (chooseDay && chooseDay === nowTime && flag) {
+
+					if (chooseDay && chooseDay === nowTime) {
 						this.$emit('choseDay', nowTime);
-						this.historyChose.push(nowTime);
-						k.chooseDay = true;
-					} else if (
-						this.historyChose[this.historyChose.length - 1] === nowTime && !chooseDay && flag
-					) {
 						k.chooseDay = true;
 					}
+
+					//在list中加入数据绑定对象
+					k.todayDetail = utils.clone(this.todayDetail);
+					k.todayDetail.dayTime = nowTime;
+
+					//最开始定义为没有修改
+					k.isModifyFlag = false;
 				}
 				this.list = arr;
 			}

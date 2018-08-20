@@ -128,7 +128,7 @@
                         </el-collapse-item>
                     </el-collapse>
                 </el-form-item>
-                <el-button type="primary" round  @click="saveClickDayInfo" style="margin: 20px auto">保存当天信息</el-button>
+                <el-button type="primary" round  @click="" style="margin: 20px auto">保存当天信息</el-button>
             </el-form>
         </div>
     </div>
@@ -145,12 +145,14 @@
 				loading: false,
 				todayDetailVisible: false,
 				showDay: [],
+                showDaysHistory:{},
+				currMouthRecordList : [],
 				todayDetail: {
 					id:'',
 					dayTime:'',
-                    dayType:'',
-                    hasLove:false,
-                    isPeriodStart:false,
+					dayType:'',
+					hasLove:false,
+					isPeriodStart:false,
 					isPeriodEnd:false,
 					periodHurt: '',
 					flowQuality: '',
@@ -170,13 +172,18 @@
 			Calendar
 		},
 		mounted: function () {
+			this.addShowMouthHistory();
 			this.getMouthRecord();
 		},
 		methods: {
 			getMouthRecord: function (d) {
 				let self = this;
 				self.loading = false;
-				let params = timeUtil.getOneMouthStartEnd(d);
+				let params = {
+					start : self.$refs.Calendar.list[0].date,
+                    end : self.$refs.Calendar.list[self.$refs.Calendar.list.length -1].date,
+                    "dateTop" : self.$refs.Calendar.dateTop
+                };
 				$.ajax({
 					type: "get",
 					url: config.baseUrl + "/api/record/getMouthRecord",
@@ -185,16 +192,8 @@
 					self.loading = false;
                     if(result.code === 200){
 	                    self.showDay = [];
-	                    const resultData = result.data;
-                        for(let i=0;i<resultData.length;i++){
-                            //1经期 2预测经期 3排卵期 4爱爱 5自定义
-                        	if(resultData[i].dayType === 1){
-		                        self.showDay.push({
-			                        "date": timeUtil.dateFormat(resultData[i].dayTime),
-			                        "className": 'periodTime'
-                                });
-                            }
-                        }
+	                    self.currMouthRecordList = result.data;
+	                    self.displayChooseMouthClassName(result.data);
                     }else{
                         self.$message({
                             message : "加载数据失败",
@@ -218,74 +217,23 @@
 					this.todayDetailVisible = false;
 				} else {
 					this.todayDetailVisible = true;
-					this.getClickDayInfo();
+					this.getClickDayInfo(data);
 				}
 			},
 			changeMouth(data) {
 				this.$message('切换到的月份为' + data);
-				console.log('左右点击切换月份', data);
+				this.addShowMouthHistory();
 				this.getMouthRecord(data);
 			},
-			jumpTo(date) {
-				this.$refs.Calendar.ChoseMonth(date);
-			},
-            getClickDayInfo : function () {
-	            let self = this;
-	            self.loading = false;
-	            $.ajax({
-		            type: "get",
-		            url: config.baseUrl + "/api/record/getDayTimeRecord",
-		            data: {
-		            	'dayTime' : self.todayDetail.dayTime
+            getClickDayInfo : function (data) {
+                for(let i=0;i<this.currMouthList.length;i++){
+                	if(this.currMouthList[i].date === data){
+		                this.todayDetail = this.currMouthList[i].todayDetail;
+                		break;
                     }
-	            }).done(function (result) {
-		            self.loading = false;
-		            if(result.code === 200){
-			            self.formateJavaDayDataToVue(result.data);
-                        console.log(self.todayDetail);
-		            }else{
-			            self.$message({
-				            message : "查询数据失败",
-				            type : "error"
-			            });
-		            }
-	            }).fail(function () {
-		            self.loading = false;
-		            self.$message({
-			            message : "查询数据失败",
-			            type : "error"
-		            });
-	            });
+                }
+
             },
-			saveClickDayInfo : function () {
-				let self = this;
-				self.loading = false;
-				$.ajax({
-					type: "POST",
-					url: config.baseUrl + "/api/record/setDayRecord",
-					contentType :'application/json;charse=UTF-8',
-					data: JSON.stringify(self.formateVueDayDataToJava(self.todayDetail))
-				}).done(function (result) {
-					self.loading = false;
-					if(result.code === 200){
-						self.$message({
-							message : "保存数据成功",
-							type : "success"
-						});
-					}else{
-						self.$message({
-							message : "保存数据失败",
-							type : "error"
-						});
-					}
-				}).fail(function () {
-					self.loading = false;
-					self.$message({
-						message : "保存数据失败",
-						type : "error"
-					});
-				});
-			},
             formateJavaDayDataToVue : function (data) {
                 this.todayDetail.id = data.id;
                 this.todayDetail.dayType = data.dayType;
@@ -318,7 +266,51 @@
 	            returnData.isPeriodStart = returnData.isPeriodStart === true ? 1:0;
 	            returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1:0;
 	            return returnData;
-            }
+            },
+			addShowMouthHistory : function () {
+                let dateTop = this.$refs.Calendar.dateTop;
+                if(!this.showDaysHistory.dateTop){
+	                this.showDaysHistory[dateTop] = [];
+	                let dateTopList = this.$refs.Calendar.list;
+	                this.showDaysHistory[dateTop].push.apply(this.showDaysHistory[dateTop],this.$refs.Calendar.list);
+                }
+            },
+            displayChooseMouthClassName : function (mouthType) {
+				//如果是这月或者将来的某月，需要显示预测日期
+                if(mouthType === 'nowMouth' || mouthType === 'afterMouth'){
+                	this.doShowClassName();
+                    this.forcastFunture(mouthType);
+                }else {
+	                this.doShowClassName();
+                }
+		    },
+            forcastFunture : function (mouthType) {
+
+            },
+			doShowClassName : function () {
+				//1经期 2预测经期 3排卵期 4自定义
+                const resultData = this.currMouthRecordList;
+				for(let i=0;i<resultData.length;i++){
+					if(resultData[i].dayType === 1){
+						this.showDay.push({
+							"date": timeUtil.dateFormat(resultData[i].dayTime),
+							"className": 'periodTime'
+						});
+					}
+					if(resultData[i].dayType === 2){
+						this.showDay.push({
+							"date": timeUtil.dateFormat(resultData[i].dayTime),
+							"className": 'forcastPeriodTime'
+						});
+					}
+					if(resultData[i].dayType === 3){
+						this.showDay.push({
+							"date": timeUtil.dateFormat(resultData[i].dayTime),
+							"className": 'ovulatoryTime'
+						});
+					}
+				}
+			}
 		}
 	}
 </script>

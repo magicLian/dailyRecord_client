@@ -121,19 +121,6 @@ export default {
 		const d2 = new Date(date2);
 		return d1.valueOf() > d2.valueOf();
 	},
-	getOneMouthStartEnd: function (d) {
-		let date = null;
-		let returnParams = {};
-		if (d) {
-			date = new Date(d);
-		} else {
-			date = new Date();
-		}
-		returnParams.start = this.getLeftArr(date)[0].date;
-		const rightArr = this.getRightArr(date);
-		returnParams.end = rightArr[rightArr.length - 1 ].date;
-		return returnParams;
-	},
 	//默认是周一开始
 	sundayStart: false
 }
