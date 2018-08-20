@@ -12,8 +12,8 @@ export default {
 		const month = date.getMonth() + 1;
 		const dateFirstOne = new Date(year + '-' + month + '-1');
 		return this.sundayStart ?
-			dateFirstOne.getDay() == 0 ? 7 : dateFirstOne.getDay() :
-			dateFirstOne.getDay() == 0 ? 6 : dateFirstOne.getDay() - 1;
+			dateFirstOne.getDay() == 0 ? 0 : dateFirstOne.getDay() :
+			dateFirstOne.getDay() == 0 ? 0 : dateFirstOne.getDay() - 1;
 	},
 	/**
 	 * 获取当前日期上个月或者下个月
@@ -75,7 +75,7 @@ export default {
 		let arr = [];
 		const nextDate = this.getOtherMonth(date, 'nextMonth');
 		const leftLength = this.getDaysInOneMonth(date) + this.getMonthweek(date);
-		const _length = 7 - leftLength % 7;
+		const _length = leftLength % 7 === 0 ? 0 : (7 -leftLength % 7);
 		for (let i = 0; i < _length; i++) {
 			const nowTime = nextDate.getFullYear() + '-' + (nextDate.getMonth() + 1) + '-' + (i + 1);
 			arr.push({
