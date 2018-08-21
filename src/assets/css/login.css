@@ -286,7 +286,7 @@ body, html {
     background: gainsboro;
     position:absolute;
     background: url("../images/stone3.png") no-repeat;
-    bottom: -100px;
+    bottom: -80px;
     right: 5%;
     animation:stone3 1.5s linear forwards;
     animation-delay:2s;
