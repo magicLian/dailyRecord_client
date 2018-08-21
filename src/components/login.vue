@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="main">
         <div class="sky">
             <div class="asky">
                 <div class="palne"></div>
@@ -7,14 +7,6 @@
                 <div class="stone2"></div>
                 <div class="stone3"></div>
                 <div class="yacht"></div>
-                <div class="zyun">
-                    <div class="yun1"></div>
-                    <div class="yun2"></div>
-                </div>
-                <div class="syun">
-                    <div class="yun1"></div>
-                    <div class="yun2"></div>
-                </div>
                 <el-form :model="login" class="border">
                     <el-row>
                         <el-col :span="24"
@@ -51,12 +43,6 @@
                 </el-form>
             </div>
         </div>
-
-        <div class="sun">
-            <div class="kernel"></div>
-            <div class="shine"></div>
-        </div>
-
         <div class="sea">
             <div class="bubble bubble1"></div>
             <div class="bubble bubble2"></div>
