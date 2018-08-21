@@ -75,7 +75,7 @@ export default {
 		let arr = [];
 		const nextDate = this.getOtherMonth(date, 'nextMonth');
 		const leftLength = this.getDaysInOneMonth(date) + this.getMonthweek(date);
-		const _length = leftLength % 7 === 0 ? 0 : (7 -leftLength % 7);
+		const _length = leftLength % 7 === 0 ? 0 : (7 - leftLength % 7);
 		for (let i = 0; i < _length; i++) {
 			const nowTime = nextDate.getFullYear() + '-' + (nextDate.getMonth() + 1) + '-' + (i + 1);
 			arr.push({
@@ -103,10 +103,12 @@ export default {
 
 		for (let i = 0; i < num; i++) {
 			const nowTime = year + '-' + month + '-' + (i + 1);
+			let isToday = toDay === nowTime;
+			let id = isToday ? '今' : i + 1;
 			arr.push({
-				id: i + 1,
+				id: id,
 				date: nowTime,
-				isToday: toDay === nowTime,
+				isToday: isToday,
 				otherMonth: `nowMonth`
 			})
 		}
@@ -116,7 +118,7 @@ export default {
 	getMonthList: function (date) {
 		return [...this.getLeftArr(date), ...this.getMonthListNoOther(date), ...this.getRightArr(date)]
 	},
-	compareDate : function (date1,date2) {
+	compareDate: function (date1, date2) {
 		const d1 = new Date(date1);
 		const d2 = new Date(date2);
 		return d1.valueOf() > d2.valueOf();

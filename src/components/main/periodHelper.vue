@@ -18,10 +18,10 @@
         <div class="todayDetailInfo" v-show="todayDetailVisible">
             <el-form ref="form" :model="todayDetail" label-width="80px">
                 <el-form-item label="经期开始">
-                    <el-switch v-model="todayDetail.isPeriodStart"></el-switch>
+                    <el-switch v-model="todayDetail.isPeriodStart" @change="startPeriodChangeFunc"></el-switch>
                 </el-form-item>
                 <el-form-item label="经期结束">
-                    <el-switch v-model="todayDetail.isPeriodEnd"></el-switch>
+                    <el-switch v-model="todayDetail.isPeriodEnd" @change="endPeriodChangeFunc"></el-switch>
                 </el-form-item>
                 <el-form-item label="爱爱">
                     <el-switch v-model="todayDetail.hasLove"></el-switch>
@@ -173,10 +173,12 @@
 			Calendar
 		},
 		mounted: function () {
+			//钩子函数在元素初始化时触发，保存历史对象和获取该月数据
 			this.addShowMouthHistory();
 			this.getMouthRecord();
 		},
 		methods: {
+			//获取月历的数据库记录
 			getMouthRecord: function (d) {
 				let self = this;
 				self.loading = false;
@@ -209,6 +211,7 @@
 					});
 				});
 			},
+            //选中那天的触发事件
 			clickDay(data) {
 				this.$message('选中了' + data);
 				this.todayDetail.dayTime = data;
@@ -221,6 +224,7 @@
 					this.getClickDayInfo(data);
 				}
 			},
+            //月份改变的触发事件
 			changeMouth(data) {
 				this.$message('切换到的月份为' + data);
 				this.addShowMouthHistory();
@@ -233,6 +237,7 @@
 					this.getMouthRecord(data);
 				}
 			},
+            //获取选中那天的信息从历史月历对象中
 			getClickDayInfo: function (data) {
 				//从大历史对象中获取点击那天的记录
 				let dateTop = this.$refs.Calendar.dateTop;
@@ -244,6 +249,7 @@
 					}
 				}
 			},
+            //转化数据类型（Java - Vue）
 			formateJavaDayDataToVue: function (data) {
 				let todayDetail = {};
 				todayDetail.id = data.id;
@@ -265,7 +271,8 @@
 				todayDetail.note = data.note === null ? '' : data.note;
 				return todayDetail;
 			},
-			formateVueDayDataToJava: function (data) {
+			//转化数据类型（Vue - Java）
+            formateVueDayDataToJava: function (data) {
 				let returnData = utils.clone(data);
 				returnData.periodShape = JSON.stringify(returnData.periodShape);
 				returnData.head = JSON.stringify(returnData.head);
@@ -279,6 +286,7 @@
 				returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1 : 0;
 				return returnData;
 			},
+            //展现出来的月历加入历史月历对象中
 			addShowMouthHistory: function () {
 				let dateTop = this.$refs.Calendar.dateTop;
 				if (!this.showDaysHistory.dateTop) {
@@ -287,14 +295,17 @@
 					this.showDaysHistory[dateTop].push.apply(this.showDaysHistory[dateTop], this.$refs.Calendar.list);
 				}
 			},
-			displayChooseMouthClassName: function (mouthType) {
+			//显示月历的日期事件颜色
+            displayChooseMouthClassName: function (mouthType) {
                 this.doShowClassName();
                 this.storeMouthRecordInHistoryList();
 			},
-			forcastFunture: function (mouthType) {
+			//预测下月
+            forcastFunture: function (mouthType) {
 
 			},
-			doShowClassName: function () {
+			//显示月历的日期事件颜色
+            doShowClassName: function () {
 				//1经期 2预测经期 3排卵期 4自定义
 				const resultData = this.currMouthRecordList;
 				for (let i = 0; i < resultData.length; i++) {
@@ -318,7 +329,8 @@
 					}
 				}
 			},
-			storeMouthRecordInHistoryList: function () {
+			//合并数据库中的月历信息到历史月历对象中
+            storeMouthRecordInHistoryList: function () {
 				let dateTop = this.$refs.Calendar.dateTop;
 				let mouthRecordList = this.currMouthRecordList;
 				let mouthShowList = this.showDaysHistory[dateTop];
@@ -336,7 +348,62 @@
 				} else {
 					this.$message('没有查询到本月的记录');
 				}
-			}
+			},
+            //经期开始的触发事件
+            startPeriodChangeFunc :function(){
+				let isStartPeriod = this.todayDetail.isPeriodStart;
+				let dayTime = this.todayDetail.dayTime;
+				const isStartedPeriod = this.checkCurrentMouthHasPeriodStart();
+				if(isStartedPeriod){
+
+                }else {
+                    this.setPeriodData();
+                    this.forcastFunture();
+                }
+            },
+            //经期结束的触发事件
+            endPeriodChangeFunc: function () {
+
+            },
+			checkCurrentMouthHasPeriodStart : function () {
+                let dateTop = this.$refs.Calendar.dateTop;
+                let flag = false;
+                const currMouthList = this.showDaysHistory[dateTop];
+                for(let i=0;i<currMouthList.length;i++){
+                	if(currMouthList[i].isPeriodStart){
+                		flag = true;
+                		break;
+                    }
+                }
+				return flag;
+			},
+			setPeriodData : function () {
+				let dayTime = this.todayDetail.dayTime;
+
+				//获取点击日在本月还剩几天
+				let clickDayThisMouthLast = this.getDateThisMouthLast(dayTime);
+
+				//如果刚够7天
+                if(clickDayThisMouthLast[0] == 7){
+
+                }
+                //不够7天则先在本月显示`clickDayThisMouthLast`天，下个月再补上该时间段
+                else {
+
+                }
+			},
+            getDateThisMouthLast : function (clickDay) {
+	            let dateTop = this.$refs.Calendar.dateTop;
+	            const currMouthList = this.showDaysHistory[dateTop];
+	            let last = 0;
+	            for(let i=0;i<currMouthList.length;i++){
+		            if(currMouthList[i].date === clickDay){
+			            last = currMouthList.length - i + 1;
+			            break;
+		            }
+	            }
+	            return last;
+            }
 		}
 	}
 </script>

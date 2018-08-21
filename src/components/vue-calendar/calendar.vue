@@ -141,12 +141,9 @@
                 </div>
             </div>
             <div class="wh_content" style="height: calc(100% - 87px);">
-                <div class="wh_content_item" v-for="(item,index) in list">
-                    <div class="wh_item_date"  @click="clickDay(item,index)"
-                         v-bind:class="[{wh_isMark: item.isMark},
-                         {wh_other_dayhide:item.otherMonth!=='nowMonth'},
-                         {wh_want_dayhide:item.dayHide},
-                         {wh_isToday:item.isToday},
+                <div class="wh_content_item" v-for="(item) in list">
+                    <div class="wh_item_date"  @click="clickDay(item)"
+                         v-bind:class="[{wh_other_dayhide:item.otherMonth!=='nowMonth'},
                          {wh_chose_day:item.chooseDay}
                          ,setClass(item)]">
                         {{item.id}}
@@ -188,20 +185,10 @@
 			};
 		},
 		props: {
-			markDate: {
-				type: Array,
-				default: () => []
-			},
-			markDateMore: {
-				type: Array,
-				default: () => []
-			},
 			sundayStart: {
 				type: Boolean,
 				default: () => false
-			},
-			agoDayHide: {type: String, default: `0`},
-			futureDayHide: {type: String, default: `2554387200`}
+			}
 		},
 		created() {
 			this.intStart();
@@ -221,8 +208,8 @@
 				obj[data.markClassName] = data.markClassName;
 				return obj;
 			},
-			clickDay: function (item, index) {
-				if (item.otherMonth === 'nowMonth' && !item.dayHide) {
+			clickDay: function (item) {
+				if (item.otherMonth === 'nowMonth') {
 					this.getList(this.myDate, item.date);
 				}
 				if (item.otherMonth !== 'nowMonth') {
@@ -230,16 +217,6 @@
 						? this.PreMonth(item.date)
 						: this.NextMonth(item.date);
 				}
-			},
-			ChoseMonth: function (date, isChosedDay = true) {
-				date = timeUtil.dateFormat(date);
-				this.myDate = new Date(date);
-				if (isChosedDay) {
-					this.getList(this.myDate, date, isChosedDay);
-				} else {
-					this.getList(this.myDate);
-				}
-				this.$emit('changeMonth', this.dateTop);
 			},
 			PreMonth: function (date, isChosedDay = true) {
 				date = timeUtil.dateFormat(date);
@@ -261,41 +238,16 @@
 				}
 				this.$emit('changeMonth', this.dateTop);
 			},
-			forMatArgs: function () {
-				let markDate = this.markDate;
-				let markDateMore = this.markDateMore;
-				markDate = markDate.map((k) => {
-					return timeUtil.dateFormat(k);
-				});
-				markDateMore = markDateMore.map((k) => {
-					k.date = timeUtil.dateFormat(k.date);
-					return k;
-				});
-				return [markDate, markDateMore];
-			},
-			getList: function (date, chooseDay, isChosedDay = true) {
-				const [markDate, markDateMore] = this.forMatArgs();
+			getList: function (date, chooseDay) {
 				this.dateTop = `${date.getFullYear()}-${date.getMonth() + 1}`;
 				let arr = timeUtil.getMonthList(this.myDate);
 				for (let i = 0; i < arr.length; i++) {
-					let markClassName = '';
 					let k = arr[i];
 					k.chooseDay = false;
 					const nowTime = k.date;
 
-					//看每一天的class
-					for (const c of markDateMore) {
-						if (c.date === nowTime) {
-							markClassName = c.className || '';
-						}
-					}
-
 					//标记选中某些天 设置class
-					k.markClassName = markClassName;
-
-					if (k.isToday) {
-						this.$emit('isToday', nowTime);
-					}
+					k.markClassName = "";
 
 					if (chooseDay && chooseDay === nowTime) {
 						this.$emit('choseDay', nowTime);
@@ -316,20 +268,6 @@
 			this.getList(this.myDate);
 		},
 		watch: {
-			markDate(val, oldVal) {
-				this.getList(this.myDate);
-			},
-			markDateMore(val, oldVal) {
-				this.getList(this.myDate);
-			},
-			agoDayHide(val, oldVal) {
-				this.agoDayHide = parseInt(val);
-				this.getList(this.myDate);
-			},
-			futureDayHide(val, oldVal) {
-				this.futureDayHide = parseInt(val);
-				this.getList(this.myDate);
-			},
 			sundayStart(val, oldVal) {
 				this.intStart();
 				this.getList(this.myDate);
