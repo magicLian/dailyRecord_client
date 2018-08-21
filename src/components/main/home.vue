@@ -17,9 +17,9 @@
                     <h1 class="title">· Func</h1>
                 </el-col>
             </el-row>
-            <el-row :gutter="20">
-                <el-col :span="3" v-for="product in products">
-                    <el-card :body-style="{height: '200px',padding: '10px'}" shadow="hover">
+            <el-row :gutter="10">
+                <el-col :span="12" v-for="product in products">
+                    <el-card :body-style="{height: '150px',padding: '10px'}" style="margin-bottom:10px" shadow="hover">
                         <div @click="openApp(product.url)" style="width: 100%;height: 100%">
                             <img :src="product.img" class="image">
                             <div style="padding: 14px;height: 20%;font-size: 14px;">
@@ -79,14 +79,12 @@ export default {
         width: 100%;
         height: 100%;
         background: #fcfcfc;
+        padding-top: 20px;
     }
     .my-banner{
-        height: 200px;
+        height: 100px;
         width: 90%;
-        position: absolute;
-        padding: 10px;
-        margin-left: 20px;
-        margin-right: 20px;
+        margin: 0 auto;
     }
     .my-banner > h2 {
         float: left;
@@ -96,6 +94,7 @@ export default {
         position: absolute;
         z-index: 3;
         top: 16%;
+        font-weight: normal;
     }
     .my-banner > img {
         width: 100%;
@@ -111,15 +110,12 @@ export default {
     .my-product {
         height: 500px;
         width: 90%;
-        position: absolute;
-        padding: 10px;
-        top: 260px;
-        margin-left: 20px;
-        margin-right: 20px;
+        margin: 0 auto;
     }
     .title{
         font-size: 20px;
         float: left;
+        font-weight: normal;
     }
 
     .image{
