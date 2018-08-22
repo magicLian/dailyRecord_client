@@ -152,7 +152,7 @@
                 </div>
             </div>
             <div class="wh_content" style="height: calc(100% - 87px);">
-                <div class="wh_content_item" v-for="(item) in chooseMouth">
+                <div class="wh_content_item" v-for="(item) in chooseMonth">
                     <div class="wh_item_date" @click="clickDay(item)"
                          v-bind:class="[{wh_other_dayhide:item.otherMonth!=='nowMonth'},
                          {wh_chose_day:item.chooseDay}
@@ -173,9 +173,9 @@
 			return {
 				textTop: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
 				myDate: [],
-				chooseMouth: [],
+				chooseMonth: [],
 				dateTop: '',
-				showMouthsHistory: {},
+				showMonthsHistory: {},
 				todayDetail: {
 					id: '',
 					dayTime: '',
@@ -235,37 +235,39 @@
 			preMonthFunc: function (date) {
 				const newDateWithoutDay = timeUtil.dateFormatWithoutDay(date);
 				if (newDateWithoutDay === this.dateTop) { //点击的箭头切换
-					this.myDate = timeUtil.getOtherMonth(date, 'preMonth');
+					this.dateTop = timeUtil.getOtherMonthFormatWithoutDay(date, 'preMonth');
+					this.myDate = new Date(this.dateTop);
 				} else { //点击的该月其他月日期切换
 					this.myDate = new Date(newDateWithoutDay);
+					this.dateTop = newDateWithoutDay;
 				}
-				this.dateTop = newDateWithoutDay;
 				this.getPre2AndCurrentAndAfter2(this.myDate);
 				this.$emit('changeMonth', this.dateTop);
 			},
 			nextMonthFunc: function (date) {
 				const newDateWithoutDay = timeUtil.dateFormatWithoutDay(date);
 				if (newDateWithoutDay === this.dateTop) { //点击的箭头切换
-					this.myDate = timeUtil.getOtherMonth(date, 'nextMonth');
+					this.dateTop = timeUtil.getOtherMonthFormatWithoutDay(date, 'nextMonth');
+					this.myDate = new Date(this.dateTop);
 				} else { //点击的该月其他月日期切换
 					this.myDate = new Date(newDateWithoutDay);
+					this.dateTop = newDateWithoutDay;
 				}
-				this.dateTop = newDateWithoutDay;
 				this.getPre2AndCurrentAndAfter2(this.myDate);
 				this.$emit('changeMonth', this.dateTop);
 			},
 			getList: function (dateMouth, chooseDay) {
 				let dateMouthStr = timeUtil.dateFormatWithoutDay(dateMouth);
-				if (this.showMouthsHistory[dateMouthStr]) {
+				if (this.showMonthsHistory[dateMouthStr]) {
 					if (dateMouthStr === this.dateTop) {
-						this.chooseMouth = this.showMouthsHistory[dateMouthStr];
+						this.chooseMonth = this.showMonthsHistory[dateMouthStr];
 						if (chooseDay) {
-							for (let i = 0; i < this.chooseMouth.length; i++) {
-								if (chooseDay === this.chooseMouth[i].date) {
-									this.chooseMouth[i].chooseDay = true;
+							for (let i = 0; i < this.chooseMonth.length; i++) {
+								if (chooseDay === this.chooseMonth[i].date) {
+									this.chooseMonth[i].chooseDay = true;
 									this.$emit('choseDay', chooseDay);
 								} else {
-									this.chooseMouth[i].chooseDay = false;
+									this.chooseMonth[i].chooseDay = false;
 								}
 							}
 						}
@@ -273,9 +275,9 @@
 				} else {
 					let arr = timeUtil.getMonthList(dateMouth);
 					this.initMouthList(arr);
-					this.showMouthsHistory[dateMouthStr] = arr;
+					this.showMonthsHistory[dateMouthStr] = arr;
 					if (dateMouthStr === this.dateTop) {
-						this.chooseMouth = arr;
+						this.chooseMonth = arr;
 					}
 				}
 			},
