@@ -3,6 +3,7 @@
         margin: 0;
         padding: 0;
     }
+
     .wh_container {
         width: 100%;
         height: 100%;
@@ -12,9 +13,11 @@
     li {
         list-style-type: none;
     }
+
     .wh_top_changge {
         display: flex;
     }
+
     .wh_top_changge li {
         cursor: pointer;
         display: flex;
@@ -25,10 +28,12 @@
         align-items: center;
         height: 50px;
     }
+
     .wh_top_changge .wh_content_li {
         cursor: auto;
         flex: 2.5;
     }
+
     .wh_content_all {
         font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
         "Helvetica Neue", STHeiti, "Microsoft Yahei", Tahoma, Simsun, sans-serif;
@@ -38,7 +43,7 @@
         overflow: hidden;
     }
 
-    .wh_content_weekday{
+    .wh_content_weekday {
         display: flex;
         flex-wrap: wrap;
         padding: 0 3% 0 3%;
@@ -47,16 +52,19 @@
         font-size: 12px;
         color: #6f7180;
     }
+
     .wh_content {
         display: flex;
         flex-wrap: wrap;
         padding: 0 3% 0 3%;
         width: 100%;
     }
+
     .wh_content_item_weekday {
         height: 30px;
         width: 13.4%;
     }
+
     .wh_top_tag_weekday {
         width: 30px;
         height: 30px;
@@ -73,8 +81,8 @@
         height: 50px;
         text-align: center;
         color: #252525;
-        vertical-align:middle;
-        display:inline-block;
+        vertical-align: middle;
+        display: inline-block;
     }
 
     .wh_item_date {
@@ -93,10 +101,12 @@
         border-left: 2px solid #252525;
         transform: rotate(-45deg);
     }
+
     .wh_jiantou1:active,
     .wh_jiantou2:active {
         border-color: #ddd;
     }
+
     .wh_jiantou2 {
         width: 12px;
         height: 12px;
@@ -114,6 +124,7 @@
         background: #ff836b;
         border-radius: 90px;
     }
+
     .wh_content_item .wh_chose_day {
         border-radius: 100px;
         border: 2px solid #6db6dd;
@@ -125,11 +136,11 @@
     <section class="wh_container">
         <div class="wh_content_all">
             <div class="wh_top_changge">
-                <li @click="PreMonth(myDate,false)">
+                <li @click="preMonthFunc(myDate,false)">
                     <div class="wh_jiantou1"></div>
                 </li>
                 <li class="wh_content_li">{{dateTop}}</li>
-                <li @click="NextMonth(myDate,false)">
+                <li @click="nextMonthFunc(myDate,false)">
                     <div class="wh_jiantou2"></div>
                 </li>
             </div>
@@ -141,8 +152,8 @@
                 </div>
             </div>
             <div class="wh_content" style="height: calc(100% - 87px);">
-                <div class="wh_content_item" v-for="(item) in list">
-                    <div class="wh_item_date"  @click="clickDay(item)"
+                <div class="wh_content_item" v-for="(item) in chooseMouth">
+                    <div class="wh_item_date" @click="clickDay(item)"
                          v-bind:class="[{wh_other_dayhide:item.otherMonth!=='nowMonth'},
                          {wh_chose_day:item.chooseDay}
                          ,setClass(item)]">
@@ -156,20 +167,22 @@
 <script>
 	import timeUtil from './calendar';
 	import utils from '../../util/utils';
+
 	export default {
 		data() {
 			return {
 				textTop: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
 				myDate: [],
-				list: [],
+				chooseMouth: [],
 				dateTop: '',
+				showMouthsHistory: {},
 				todayDetail: {
-					id:'',
-					dayTime:'',
-					dayType:'',
-					hasLove:false,
-					isPeriodStart:false,
-					isPeriodEnd:false,
+					id: '',
+					dayTime: '',
+					dayType: '',
+					hasLove: false,
+					isPeriodStart: false,
+					isPeriodEnd: false,
 					periodHurt: '',
 					flowQuality: '',
 					bloodColor: '',
@@ -193,11 +206,12 @@
 		created() {
 			this.intStart();
 			this.myDate = new Date();
+			this.dateTop = `${this.myDate.getFullYear()}-${this.myDate.getMonth() + 1}`;
 		},
 		methods: {
 			intStart() {
 				if (this.sundayStart) {
-					this.textTop = [ '周日', '周一','周二', '周三', '周四', '周五', '周六'];
+					this.textTop = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 				} else {
 					this.textTop = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 				}
@@ -214,33 +228,58 @@
 				}
 				if (item.otherMonth !== 'nowMonth') {
 					item.otherMonth === 'preMonth'
-						? this.PreMonth(item.date)
-						: this.NextMonth(item.date);
+						? this.preMonthFunc(item.date)
+						: this.nextMonthFunc(item.date);
 				}
 			},
-			PreMonth: function (date, isChosedDay = true) {
-				date = timeUtil.dateFormat(date);
-				this.myDate = timeUtil.getOtherMonth(this.myDate, 'preMonth');
-				if (isChosedDay) {
-					this.getList(this.myDate, date, isChosedDay);
-				} else {
-					this.getList(this.myDate);
+			preMonthFunc: function (date) {
+				const newDateWithoutDay = timeUtil.dateFormatWithoutDay(date);
+				if (newDateWithoutDay === this.dateTop) { //点击的箭头切换
+					this.myDate = timeUtil.getOtherMonth(date, 'preMonth');
+				} else { //点击的该月其他月日期切换
+					this.myDate = new Date(newDateWithoutDay);
 				}
+				this.dateTop = newDateWithoutDay;
+				this.getPre2AndCurrentAndAfter2(this.myDate);
 				this.$emit('changeMonth', this.dateTop);
 			},
-			NextMonth: function (date, isChosedDay = true) {
-				date = timeUtil.dateFormat(date);
-				this.myDate = timeUtil.getOtherMonth(this.myDate, 'nextMonth');
-				if (isChosedDay) {
-					this.getList(this.myDate, date, isChosedDay);
-				} else {
-					this.getList(this.myDate);
+			nextMonthFunc: function (date) {
+				const newDateWithoutDay = timeUtil.dateFormatWithoutDay(date);
+				if (newDateWithoutDay === this.dateTop) { //点击的箭头切换
+					this.myDate = timeUtil.getOtherMonth(date, 'nextMonth');
+				} else { //点击的该月其他月日期切换
+					this.myDate = new Date(newDateWithoutDay);
 				}
+				this.dateTop = newDateWithoutDay;
+				this.getPre2AndCurrentAndAfter2(this.myDate);
 				this.$emit('changeMonth', this.dateTop);
 			},
-			getList: function (date, chooseDay) {
-				this.dateTop = `${date.getFullYear()}-${date.getMonth() + 1}`;
-				let arr = timeUtil.getMonthList(this.myDate);
+			getList: function (dateMouth, chooseDay) {
+				let dateMouthStr = timeUtil.dateFormatWithoutDay(dateMouth);
+				if (this.showMouthsHistory[dateMouthStr]) {
+					if (dateMouthStr === this.dateTop) {
+						this.chooseMouth = this.showMouthsHistory[dateMouthStr];
+						if (chooseDay) {
+							for (let i = 0; i < this.chooseMouth.length; i++) {
+								if (chooseDay === this.chooseMouth[i].date) {
+									this.chooseMouth[i].chooseDay = true;
+									this.$emit('choseDay', chooseDay);
+								} else {
+									this.chooseMouth[i].chooseDay = false;
+								}
+							}
+						}
+					}
+				} else {
+					let arr = timeUtil.getMonthList(dateMouth);
+					this.initMouthList(arr);
+					this.showMouthsHistory[dateMouthStr] = arr;
+					if (dateMouthStr === this.dateTop) {
+						this.chooseMouth = arr;
+					}
+				}
+			},
+			initMouthList: function (arr) {
 				for (let i = 0; i < arr.length; i++) {
 					let k = arr[i];
 					k.chooseDay = false;
@@ -249,11 +288,6 @@
 					//标记选中某些天 设置class
 					k.markClassName = "";
 
-					if (chooseDay && chooseDay === nowTime) {
-						this.$emit('choseDay', nowTime);
-						k.chooseDay = true;
-					}
-
 					//在list中加入数据绑定对象
 					k.todayDetail = utils.clone(this.todayDetail);
 					k.todayDetail.dayTime = nowTime;
@@ -261,16 +295,36 @@
 					//最开始定义为没有修改
 					k.isModifyFlag = false;
 				}
-				this.list = arr;
+				return arr;
+			},
+			getPre2AndCurrentAndAfter2: function (date) {
+				//本月
+				this.getList(date, false);
+				//前2月
+				this.getPre2(date);
+				//后2月
+				this.getAfter2(date);
+			},
+			getPre2: function (date) {
+				let datePre1 = timeUtil.getOtherMonth(date, 'preMonth');
+				this.getList(datePre1, false);
+				let datePre2 = timeUtil.getOtherMonth(datePre1, 'preMonth');
+				this.getList(datePre2, false);
+			},
+			getAfter2: function (date) {
+				let dateAfter1 = timeUtil.getOtherMonth(date, 'nextMonth');
+				this.getList(dateAfter1, false);
+				let dateAfter2 = timeUtil.getOtherMonth(dateAfter1, 'nextMonth');
+				this.getList(dateAfter2, false);
 			}
 		},
 		mounted() {
-			this.getList(this.myDate);
+			this.getPre2AndCurrentAndAfter2(this.myDate);
 		},
 		watch: {
 			sundayStart(val, oldVal) {
 				this.intStart();
-				this.getList(this.myDate);
+				this.getPre2AndCurrentAndAfter2(this.myDate);
 			}
 		}
 	};

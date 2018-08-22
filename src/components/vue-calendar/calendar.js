@@ -15,9 +15,8 @@ export default {
 			dateFirstOne.getDay() == 0 ? 0 : dateFirstOne.getDay() :
 			dateFirstOne.getDay() == 0 ? 0 : dateFirstOne.getDay() - 1;
 	},
-	/**
-	 * 获取当前日期上个月或者下个月
-	 */
+
+	//获取当前日期上个月或者下个月 返回date
 	getOtherMonth: function (date, str = 'nextMonth') {
 		const timeArray = this.dateFormat(date).split('-');
 		const year = timeArray[0];
@@ -52,6 +51,30 @@ export default {
 		const t2 = year2 + '-' + month2 + '-' + day2;
 		return new Date(t2)
 	},
+
+	//获取当前日期上个月或者下个月 返回yyyy-MM
+	getOtherMonthFormatWithoutDay: function (date, str = 'nextMonth') {
+		const timeArray = this.dateFormat(date).split('-');
+		const year = timeArray[0];
+		const month = timeArray[1];
+		let year2 = year;
+		let month2;
+		if (str === 'nextMonth') {
+			month2 = parseInt(month) + 1;
+			if (month2 === 13) {
+				year2 = parseInt(year2) + 1;
+				month2 = 1
+			}
+		} else {
+			month2 = parseInt(month) - 1;
+			if (month2 === 0) {
+				year2 = parseInt(year2) - 1;
+				month2 = 12
+			}
+		}
+		return year2 + '-' + month2;
+	},
+
 	//上个月末尾的一些日期
 	getLeftArr: function (date) {
 		let arr = [];
@@ -87,12 +110,18 @@ export default {
 		}
 		return arr;
 	},
+
 	//format日期
 	dateFormat: function (date) {
 		date = typeof date === 'string' ? new Date(date) : date;
 		return date.getFullYear() + '-' + (date.getMonth() + 1) + '-'
 			+ date.getDate();
 	},
+	dateFormatWithoutDay: function (date) {
+		date = typeof date === 'string' ? new Date(date) : date;
+		return date.getFullYear() + '-' + (date.getMonth() + 1);
+	},
+
 	//获取某月的列表不包括上月和下月
 	getMonthListNoOther: function (date) {
 		let arr = [];
