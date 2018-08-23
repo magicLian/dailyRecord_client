@@ -234,6 +234,7 @@
 			},
 			preMonthFunc: function (date) {
 				const newDateWithoutDay = timeUtil.dateFormatWithoutDay(date);
+				this.clearMouthChoose(true,false);
 				if (newDateWithoutDay === this.dateTop) { //点击的箭头切换
 					this.dateTop = timeUtil.getOtherMonthFormatWithoutDay(date, 'preMonth');
 					this.myDate = new Date(this.dateTop);
@@ -246,6 +247,7 @@
 			},
 			nextMonthFunc: function (date) {
 				const newDateWithoutDay = timeUtil.dateFormatWithoutDay(date);
+				this.clearMouthChoose(true,false);
 				if (newDateWithoutDay === this.dateTop) { //点击的箭头切换
 					this.dateTop = timeUtil.getOtherMonthFormatWithoutDay(date, 'nextMonth');
 					this.myDate = new Date(this.dateTop);
@@ -318,7 +320,19 @@
 				this.getList(dateAfter1, false);
 				let dateAfter2 = timeUtil.getOtherMonth(dateAfter1, 'nextMonth');
 				this.getList(dateAfter2, false);
-			}
+			},
+            clearMouthChoose(isClearChoose,isClearClassName){
+                let dateTop = this.dateTop;
+                let mouthList = this.showMonthsHistory[dateTop];
+                for(let i=0;i<mouthList.length;i++){
+                	if(isClearChoose){
+		                mouthList[i].chooseDay = false;
+                    }
+                    if(isClearClassName){
+                		mouthList[i].className = "";
+                    }
+                }
+            }
 		},
 		mounted() {
 			this.getPre2AndCurrentAndAfter2(this.myDate);
