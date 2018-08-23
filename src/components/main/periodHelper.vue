@@ -4,7 +4,6 @@
             <div class="calendarContent">
                 <Calendar ref="Calendar"
                           :sundayStart="true"
-                          :markDateMore="showDay"
                           v-on:choseDay="clickDay"
                           v-on:changeMonth="changeMouth">
                 </Calendar>
@@ -145,8 +144,6 @@
 			return {
 				loading: false,
 				todayDetailVisible: false,
-				showDay: [],
-				showDaysHistory: {},
 				currMouthRecordList: [],
 				todayDetail: {
 					id: '',
@@ -174,234 +171,231 @@
 		},
 		mounted: function () {
 			//钩子函数在元素初始化时触发，保存历史对象和获取该月数据
-			//this.getMouthRecord();
+			this.getMouthRecord();
 		},
 		methods: {
-//			//获取月历的数据库记录
-//			getMouthRecord: function (d) {
-//				let self = this;
-//				self.loading = false;
-//				let params = {
-//					start: self.$refs.Calendar.chooseMouth[0].date,
-//					end: self.$refs.Calendar.list[self.$refs.Calendar.chooseMouth.length - 1].date,
-//					"dateTop": self.$refs.Calendar.dateTop
-//				};
-//				$.ajax({
-//					type: "get",
-//					url: config.baseUrl + "/api/record/getMouthRecord",
-//					data: params
-//				}).done(function (result) {
-//					self.loading = false;
-//					if (result.code === 200) {
-//						self.showDay = [];
-//						self.currMouthRecordList = result.data;
-//						self.displayChooseMouthClassName(result.data);
-//					} else {
-//						self.$message({
-//							message: "加载数据失败",
-//							type: "error"
-//						});
-//					}
-//				}).fail(function () {
-//					self.loading = false;
-//					self.$message({
-//						message: "加载数据失败",
-//						type: "error"
-//					});
-//				});
-//			},
-//            //选中那天的触发事件
+			//获取月历的数据库记录
+			getMouthRecord: function () {
+				let self = this;
+				self.loading = false;
+				let params = {
+					start: self.$refs.Calendar.chooseMonth[0].date,
+					end: self.$refs.Calendar.chooseMonth[self.$refs.Calendar.chooseMonth.length - 1].date,
+					"dateTop": self.$refs.Calendar.dateTop
+				};
+				$.ajax({
+					type: "get",
+					url: config.baseUrl + "/api/record/getMouthRecord",
+					data: params
+				}).done(function (result) {
+					self.loading = false;
+					if (result.code === 200) {
+						self.currMouthRecordList = result.data;
+						self.storeMouthRecordInHistoryList();
+					} else {
+						self.$message({
+							message: "加载数据失败",
+							type: "error"
+						});
+					}
+				}).fail(function () {
+					self.loading = false;
+					self.$message({
+						message: "加载数据失败",
+						type: "error"
+					});
+				});
+			},
+			//选中那天的触发事件
 			clickDay(data) {
 				this.$message('选中了' + data);
-				this.todayDetail.dayTime = data;
 				const today = new Date();
 				if (timeUtil.compareDate(data, today)) {
 					this.$message('无法编辑未来');
 					this.todayDetailVisible = false;
 				} else {
 					this.todayDetailVisible = true;
-					//this.getClickDayInfo(data);
+					this.getClickDayInfo(data);
 				}
 			},
-            //月份改变的触发事件
+			//月份改变的触发事件
 			changeMouth(data) {
 				this.$message('切换到的月份为' + data);
 				const today = new Date();
 				if (timeUtil.compareDate(data, today)) {
 					this.todayDetailVisible = false;
-					//this.forcastFunture('afterMouth');
+					this.forcastFunture('afterMouth');
 				} else {
 					this.todayDetailVisible = true;
-					//this.getMouthRecord(data);
+					this.getMouthRecord(data);
 				}
 			},
-//            //获取选中那天的信息从历史月历对象中
-//			getClickDayInfo: function (data) {
-//				//从大历史对象中获取点击那天的记录
-//				let dateTop = this.$refs.Calendar.dateTop;
-//				let mouthShowList = this.showDaysHistory[dateTop];
-//				for (let i = 0; i < mouthShowList.length; i++) {
-//					if (mouthShowList[i].date === data) {
-//						this.todayDetail = mouthShowList[i].todayDetail;
-//						break;
-//					}
-//				}
-//			},
-//            //转化数据类型（Java - Vue）
-//			formateJavaDayDataToVue: function (data) {
-//				let todayDetail = {};
-//				todayDetail.id = data.id;
-//				todayDetail.dayType = data.dayType;
-//				todayDetail.dayTime = timeUtil.dateFormat(data.dayTime);
-//				todayDetail.hasLove = data.hasLove === 1;
-//				todayDetail.isPeriodStart = data.isPeriodStart === 1;
-//				todayDetail.isPeriodEnd = data.isPeriodEnd === 1;
-//				todayDetail.periodHurt = data.periodHurt === null ? '' : data.periodHurt;
-//				todayDetail.flowQuality = data.flowQuality === null ? '' : data.flowQuality;
-//				todayDetail.bloodColor = data.bloodColor === null ? '' : data.bloodColor;
-//				todayDetail.periodShape = data.periodShape === null ? [] : JSON.parse(data.periodShape);
-//				todayDetail.head = data.head === null ? [] : JSON.parse(data.head);
-//				todayDetail.body = data.body === null ? [] : JSON.parse(data.body);
-//				todayDetail.privateTh = data.privateTh === null ? [] : JSON.parse(data.privateTh);
-//				todayDetail.whitePip = data.whitePip === null ? [] : JSON.parse(data.whitePip);
-//				todayDetail.stomach = data.stomach === null ? [] : JSON.parse(data.stomach);
-//				todayDetail.tought = data.tought === null ? [] : JSON.parse(data.tought);
-//				todayDetail.note = data.note === null ? '' : data.note;
-//				return todayDetail;
-//			},
-//			//转化数据类型（Vue - Java）
-//            formateVueDayDataToJava: function (data) {
-//				let returnData = utils.clone(data);
-//				returnData.periodShape = JSON.stringify(returnData.periodShape);
-//				returnData.head = JSON.stringify(returnData.head);
-//				returnData.body = JSON.stringify(returnData.body);
-//				returnData.privateTh = JSON.stringify(returnData.privateTh);
-//				returnData.whitePip = JSON.stringify(returnData.whitePip);
-//				returnData.stomach = JSON.stringify(returnData.stomach);
-//				returnData.tought = JSON.stringify(returnData.tought);
-//				returnData.hasLove = returnData.hasLove === true ? 1 : 0;
-//				returnData.isPeriodStart = returnData.isPeriodStart === true ? 1 : 0;
-//				returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1 : 0;
-//				return returnData;
-//			},
-//            //展现出来的月历加入历史月历对象中
-//			addShowMouthHistory: function () {
-//				let dateTop = this.$refs.Calendar.dateTop;
-//				if (!this.showDaysHistory.dateTop) {
-//					this.showDaysHistory[dateTop] = [];
-//					let dateTopList = this.$refs.Calendar.list;
-//					this.showDaysHistory[dateTop].push.apply(this.showDaysHistory[dateTop], this.$refs.Calendar.list);
-//				}
-//			},
-//			//显示月历的日期事件颜色
-//            displayChooseMouthClassName: function (mouthType) {
-//                this.doShowClassName();
-//                this.storeMouthRecordInHistoryList();
-//			},
-//			//预测下月
-//            forcastFunture: function (mouthType) {
-//
-//			},
-//			//显示月历的日期事件颜色
-//            doShowClassName: function () {
-//				//1经期 2预测经期 3排卵期 4自定义
-//				const resultData = this.currMouthRecordList;
-//				for (let i = 0; i < resultData.length; i++) {
-//					if (resultData[i].dayType === 1) {
-//						this.showDay.push({
-//							"date": timeUtil.dateFormat(resultData[i].dayTime),
-//							"className": 'periodTime'
-//						});
-//					}
-//					if (resultData[i].dayType === 2) {
-//						this.showDay.push({
-//							"date": timeUtil.dateFormat(resultData[i].dayTime),
-//							"className": 'forcastPeriodTime'
-//						});
-//					}
-//					if (resultData[i].dayType === 3) {
-//						this.showDay.push({
-//							"date": timeUtil.dateFormat(resultData[i].dayTime),
-//							"className": 'ovulatoryTime'
-//						});
-//					}
-//				}
-//			},
-//			//合并数据库中的月历信息到历史月历对象中
-//            storeMouthRecordInHistoryList: function () {
-//				let dateTop = this.$refs.Calendar.dateTop;
-//				let mouthRecordList = this.currMouthRecordList;
-//				let mouthShowList = this.showDaysHistory[dateTop];
-//
-//				if (mouthRecordList.length != 0) {
-//					for (let i = 0; i < mouthRecordList.length; i++) {
-//						let dataToVue = this.formateJavaDayDataToVue(mouthRecordList[i]);
-//						for (let j = 0; j < mouthShowList.length; j++) {
-//							if (mouthShowList[j].date === dataToVue.dayTime) {
-//								mouthShowList[j].todayDetail = dataToVue;
-//								break;
-//							}
-//						}
-//					}
-//				} else {
-//					this.$message('没有查询到本月的记录');
-//				}
-//			},
-            //经期开始的触发事件
-            startPeriodChangeFunc :function(){
-				let isStartPeriod = this.todayDetail.isPeriodStart;
-				let dayTime = this.todayDetail.dayTime;
-//				const isStartedPeriod = this.checkCurrentMouthHasPeriodStart();
-//				if(isStartedPeriod){
-//
-//                }else {
-////                    this.setPeriodData();
-////                    this.forcastFunture();
-//                }
-            },
-            //经期结束的触发事件
-            endPeriodChangeFunc: function () {
+			//获取选中那天的信息从历史月历对象中
+			getClickDayInfo: function (data) {
+				//从对象中获取点击那天的记录
+				let mouthShowList = this.$refs.Calendar.chooseMonth;
+				for (let i = 0; i < mouthShowList.length; i++) {
+					if (mouthShowList[i].date === data) {
+						this.todayDetail = mouthShowList[i].todayDetail;
+						break;
+					}
+				}
+			},
+			//转化数据类型（Java - Vue）
+			formateJavaDayDataToVue: function (data) {
+				let todayDetail = {};
+				todayDetail.id = data.id;
+				todayDetail.dayType = data.dayType;
+				todayDetail.dayTime = timeUtil.dateFormat(data.dayTime);
+				todayDetail.hasLove = data.hasLove === 1;
+				todayDetail.isPeriodStart = data.isPeriodStart === 1;
+				todayDetail.isPeriodEnd = data.isPeriodEnd === 1;
+				todayDetail.periodHurt = data.periodHurt === null ? '' : data.periodHurt;
+				todayDetail.flowQuality = data.flowQuality === null ? '' : data.flowQuality;
+				todayDetail.bloodColor = data.bloodColor === null ? '' : data.bloodColor;
+				todayDetail.periodShape = data.periodShape === null ? [] : JSON.parse(data.periodShape);
+				todayDetail.head = data.head === null ? [] : JSON.parse(data.head);
+				todayDetail.body = data.body === null ? [] : JSON.parse(data.body);
+				todayDetail.privateTh = data.privateTh === null ? [] : JSON.parse(data.privateTh);
+				todayDetail.whitePip = data.whitePip === null ? [] : JSON.parse(data.whitePip);
+				todayDetail.stomach = data.stomach === null ? [] : JSON.parse(data.stomach);
+				todayDetail.tought = data.tought === null ? [] : JSON.parse(data.tought);
+				todayDetail.note = data.note === null ? '' : data.note;
+				return todayDetail;
+			},
+			//转化数据类型（Vue - Java）
+			formateVueDayDataToJava: function (data) {
+				let returnData = utils.clone(data);
+				returnData.periodShape = JSON.stringify(returnData.periodShape);
+				returnData.head = JSON.stringify(returnData.head);
+				returnData.body = JSON.stringify(returnData.body);
+				returnData.privateTh = JSON.stringify(returnData.privateTh);
+				returnData.whitePip = JSON.stringify(returnData.whitePip);
+				returnData.stomach = JSON.stringify(returnData.stomach);
+				returnData.tought = JSON.stringify(returnData.tought);
+				returnData.hasLove = returnData.hasLove === true ? 1 : 0;
+				returnData.isPeriodStart = returnData.isPeriodStart === true ? 1 : 0;
+				returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1 : 0;
+				return returnData;
+			},
+			//预测下月
+			forcastFunture: function (mouthType) {
 
-            },
-//			checkCurrentMouthHasPeriodStart : function () {
-//                let dateTop = this.$refs.Calendar.dateTop;
-//                let flag = false;
-//                const currMouthList = this.showDaysHistory[dateTop];
-//                for(let i=0;i<currMouthList.length;i++){
-//                	if(currMouthList[i].isPeriodStart){
-//                		flag = true;
-//                		break;
-//                    }
-//                }
-//				return flag;
-//			},
-//			setPeriodData : function () {
-//				let dayTime = this.todayDetail.dayTime;
-//
-//				//获取点击日在本月还剩几天
-//				let clickDayThisMouthLast = this.getDateThisMouthLast(dayTime);
-//
-//				//如果刚够7天
-//                if(clickDayThisMouthLast[0] == 7){
-//
-//                }
-//                //不够7天则先在本月显示`clickDayThisMouthLast`天，下个月再补上该时间段
-//                else {
-//
-//                }
-//			},
-//            getDateThisMouthLast : function (clickDay) {
-//	            let dateTop = this.$refs.Calendar.dateTop;
-//	            const currMouthList = this.showDaysHistory[dateTop];
-//	            let last = 0;
-//	            for(let i=0;i<currMouthList.length;i++){
-//		            if(currMouthList[i].date === clickDay){
-//			            last = currMouthList.length - i + 1;
-//			            break;
-//		            }
-//	            }
-//	            return last;
-//            }
+			},
+			//合并数据库中的月历信息到历史月历对象中,显示月历的日期事件颜色
+			storeMouthRecordInHistoryList: function () {
+				const dateTop = this.$refs.Calendar.dateTop;
+				const resultData = this.currMouthRecordList;
+				let chooseMouthList = this.$refs.Calendar.chooseMonth;
+
+				if (resultData.length != 0) {
+					for (let i = 0; i < resultData.length; i++) {
+						let dataToVue = this.formateJavaDayDataToVue(resultData[i]);
+						for (let j = 0; j < chooseMouthList.length; j++) {
+							if (chooseMouthList[j].date === dataToVue.dayTime) {
+								if (dataToVue.dayType === 1) {
+									chooseMouthList[j].markClassName = 'periodTime';
+								}
+								if (dataToVue.dayType === 2) {
+									chooseMouthList[j].markClassName = 'forcastPeriodTime';
+								}
+								if (dataToVue.dayType === 3) {
+									chooseMouthList[j].markClassName = 'ovulatoryTime';
+								}
+								chooseMouthList[j].todayDetail = dataToVue;
+							}
+						}
+					}
+					this.$refs.Calendar.chooseMonth = chooseMouthList;
+					this.$refs.Calendar.showMonthsHistory[dateTop] = chooseMouthList;
+				} else {
+					this.$message('没有查询到本月的记录');
+				}
+			},
+			//经期开始的触发事件
+			startPeriodChangeFunc: function () {
+				let isClickDayStartPeriod = this.todayDetail.isPeriodStart;
+				let clickDay = this.todayDetail.dayTime;
+				const dateTop = this.$refs.Calendar.dateTop;
+
+				if (isClickDayStartPeriod) {
+					console.log(clickDay + " peroid start");
+					const nearlyPeriodEnd = this.getNearlyPeriodEnd(dateTop,clickDay);
+					if (null !== nearlyPeriodEnd) {
+						this.setPeriodAndForcast(dateTop, this.todayDetail.dayTime, nearlyPeriodEnd);
+					} else {
+						this.todayDetail.isPeriodStart = true;
+					}
+				} else {
+					console.log(clickDay + " peroid start");
+					const nearlyPeriodStart = this.getNearlyPeriodStart(dateTop);
+
+				}
+			},
+			//经期结束的触发事件
+			endPeriodChangeFunc: function () {
+
+			},
+			getNearlyPeriodStart: function () {
+
+			},
+			getNearlyPeriodEnd: function (dateTop,start) {
+				let flag = null;
+				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
+				for (let i = 0; i < currMouthList.length; i++) {
+					if(timeUtil.compareDate(currMouthList[i].date,start)){
+						if(currMouthList[i].todayDetail.isPeriodStart){
+							return flag;
+                        }
+						if (currMouthList[i].otherMonth === 'nowMonth' && currMouthList[i].todayDetail.isPeriodEnd) {
+							flag = currMouthList[i].date;
+							return flag;
+						}
+                    }
+				}
+				let after = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
+				if (!this.$refs.Calendar.showMonthsHistory[after]) {
+					return flag;
+				} else {
+					this.getNearlyPeriodEnd(after,after+'-1');
+				}
+			},
+			setPeriodAndForcast: function (dateTop, startDay, endDay) {
+				this.setPeriodData(dateTop, startDay, endDay);
+				this.setForcastData(dateTop, startDay, endDay);
+			},
+			setPeriodData: function (dateTop, startDay, endDay) {
+				let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
+				let flag = false;
+
+				for (let i = 0; i < monthList.length; i++) {
+					if (monthList[i].date === startDay) {
+						monthList[i].todayDetail.isPeriodStart = true;
+						monthList[i].markClassName = "periodTime";
+						monthList[i].isModifyFlag = true;
+					}
+					if (monthList[i].date === endDay && monthList[i].otherMonth === 'nowMonth') {
+						flag = true;
+						monthList[i].todayDetail.isPeriodEnd = true;
+						monthList[i].markClassName = "periodTime";
+						monthList[i].isModifyFlag = true;
+						break;
+					}
+					if (timeUtil.compareDate(monthList[i].date, startDay)) {
+						monthList[i].todayDetail.isPeriodStart = false;
+						monthList[i].markClassName = "periodTime";
+						monthList[i].isModifyFlag = true;
+					}
+				}
+
+				if (!flag) {
+					let after = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
+					this.setPeriodData(after, startDay, endDay);
+				}
+			},
+			setForcastData: function (dateTop, startDay, endDay) {
+
+			}
 		}
 	}
 </script>
