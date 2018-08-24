@@ -152,6 +152,11 @@ export default {
 		const d2 = new Date(date2);
 		return d1.valueOf() > d2.valueOf();
 	},
+	isDateBeyondToday : function (date) {
+		const today = this.dateFormat(new Date());
+		return this.compareDate(date,today);
+	},
+
 	//默认是周一开始
 	sundayStart: false
 }

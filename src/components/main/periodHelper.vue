@@ -317,14 +317,39 @@
 				let isClickDayStartPeriod = this.todayDetail.isPeriodStart;
 				let clickDay = this.todayDetail.dayTime;
 				const dateTop = this.$refs.Calendar.dateTop;
+				let today = new Date(clickDay);
+				today.setDate(today.getDate() + 35);
+                const endDay  = timeUtil.dateFormat(today);
 
 				if (isClickDayStartPeriod) {
 					console.log(clickDay + " peroid start");
-					const nearlyPeriodEnd = this.getNearlyPeriodEnd(dateTop,clickDay);
-					if (null !== nearlyPeriodEnd) {
-						this.setPeriodAndForcast(dateTop, this.todayDetail.dayTime, nearlyPeriodEnd);
+					//先获取开始这天的后面（经期范围内）有没有经期结束
+					const nearlyPeriodEnd = this.getNearlyPeriodEnd(dateTop,clickDay,endDay,'next');
+					console.log(nearlyPeriodEnd);
+					if (nearlyPeriodEnd) {
+						this.setPeriodAndForcast(dateTop, clickDay, nearlyPeriodEnd);
 					} else {
 						this.todayDetail.isPeriodStart = true;
+					}
+				} else {
+					console.log(clickDay + " peroid start");
+					const nearlyPeriodStart = this.getNearlyPeriodStart(dateTop);
+				}
+			},
+			//经期结束的触发事件
+			endPeriodChangeFunc: function () {
+				let isClickDayEndPeriod = this.todayDetail.isPeriodEnd;
+				let clickDay = this.todayDetail.dayTime;
+				const dateTop = this.$refs.Calendar.dateTop;
+
+				if (isClickDayEndPeriod) {
+					console.log(clickDay + " peroid end");
+					const nearlyPeriodStart = this.getNearlyPeriodStart(dateTop,clickDay,'pre');
+					console.log(nearlyPeriodStart);
+					if (nearlyPeriodStart) {
+						this.setPeriodAndForcast(dateTop, nearlyPeriodStart, clickDay);
+					} else {
+						this.todayDetail.isPeriodEnd = true;
 					}
 				} else {
 					console.log(clickDay + " peroid start");
@@ -332,32 +357,85 @@
 
 				}
 			},
-			//经期结束的触发事件
-			endPeriodChangeFunc: function () {
-
-			},
-			getNearlyPeriodStart: function () {
-
-			},
-			getNearlyPeriodEnd: function (dateTop,start) {
-				let flag = null;
+			getNearlyPeriodStart: function (dateTop,start,towards='pre') {
+				let flag = false;
 				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
+				let towardsMonth = null;
+
 				for (let i = 0; i < currMouthList.length; i++) {
-					if(timeUtil.compareDate(currMouthList[i].date,start)){
-						if(currMouthList[i].todayDetail.isPeriodStart){
-							return flag;
-                        }
-						if (currMouthList[i].otherMonth === 'nowMonth' && currMouthList[i].todayDetail.isPeriodEnd) {
-							flag = currMouthList[i].date;
+					let canCompare = null;
+					if(towards === 'pre'){
+                        canCompare = timeUtil.compareDate(start,currMouthList[i].date);
+                    }else if(towards === 'next'){
+						canCompare = timeUtil.compareDate(currMouthList[i].date,start);
+                    }
+
+                    console.log("time:"+currMouthList[i].date + " & canCompare="+canCompare);
+
+					if(canCompare){
+						if(currMouthList[i].todayDetail.isPeriodEnd){
+							console.log("find period end:"+currMouthList[i].date+" &flag="+flag);
 							return flag;
 						}
-                    }
+						if (currMouthList[i].otherMonth === 'nowMonth' && currMouthList[i].todayDetail.isPeriodStart) {
+							flag = currMouthList[i].date;
+							console.log("find period start:" +flag);
+							return flag;
+						}
+					}
 				}
-				let after = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
-				if (!this.$refs.Calendar.showMonthsHistory[after]) {
+
+
+				if(towards === 'pre'){
+					towardsMonth = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "preMonth");
+                }else if (towards === 'next'){
+					towardsMonth = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
+                }
+				if (!this.$refs.Calendar.showMonthsHistory[towardsMonth]) {
+					console.log("find nothing &flag="+flag+" &towardsMonth="+towardsMonth);
 					return flag;
 				} else {
-					this.getNearlyPeriodEnd(after,after+'-1');
+					this.getNearlyPeriodStart(towardsMonth,towardsMonth+'-1');
+				}
+			},
+			getNearlyPeriodEnd: function (dateTop,start,end,towards='pre') {
+				let flag = false;
+				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
+
+				if (towards === 'pre') {
+                    for (let i = currMouthList.length; i > 0; i--) {
+						let canCompare = null;
+						canCompare = timeUtil.compareDate(start, currMouthList[i].date);
+						if (canCompare) {
+							if (currMouthList[i].otherMonth === 'nowMonth' && currMouthList[i].todayDetail.isPeriodEnd) {
+								flag = currMouthList[i].date;
+								console.log("find period end :" + flag);
+								return flag;
+							}
+						}
+	                    console.log("time:"+currMouthList[i].date + " & canCompare:"+canCompare);
+					}
+					dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "preMonth");
+				} else if (towards === 'next') {
+					for (let j = 0; j < currMouthList.length; j++) {
+						let canCompare = timeUtil.compareDate(currMouthList[j].date, start) && timeUtil.isDateBeyondToday(currMouthList[j].date) &&timeUtil.compareDate(end,currMouthList[j].date);
+						if (canCompare) {
+							if (currMouthList[j].otherMonth === 'nowMonth' && currMouthList[j].todayDetail.isPeriodEnd) {
+								flag = currMouthList[j].date;
+								console.log("find period end :" + flag);
+								return flag;
+							}
+						}
+						console.log("time:"+currMouthList[j].date + " & canCompare:"+canCompare);
+					}
+					dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
+                }
+
+				if (timeUtil.isDateBeyondToday(dateTop) || !this.$refs.Calendar.showMonthsHistory[dateTop]) {
+					console.log("find nothing &flag="+flag);
+					return flag;
+				} else {
+					this.getNearlyPeriodEnd(dateTop,dateTop+'-1',end,towards);
 				}
 			},
 			setPeriodAndForcast: function (dateTop, startDay, endDay) {
