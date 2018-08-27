@@ -193,7 +193,8 @@
 					whitePip: [],
 					stomach: [],
 					tought: [],
-					note: ""
+					note: "",
+					isEffective : false
 				}
 			};
 		},
