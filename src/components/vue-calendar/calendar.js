@@ -157,6 +157,13 @@ export default {
 		return this.compareDate(date,today);
 	},
 
+	getDateAddOrMins:function(date,num){
+		const d = new Date(date);
+		let newD = new Date();
+		newD.setDate(d.getDate() + num);
+		return this.dateFormat(newD);
+	},
+
 	//默认是周一开始
 	sundayStart: false
 }

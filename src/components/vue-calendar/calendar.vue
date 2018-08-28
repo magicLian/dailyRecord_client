@@ -78,7 +78,7 @@
     .wh_content_item {
         font-size: 15px;
         width: 13.5%;
-        height: 50px;
+        height: 55px;
         text-align: center;
         color: #252525;
         vertical-align: middle;
@@ -92,6 +92,17 @@
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+
+    .wh_item_img{
+        width: 100%;
+        text-align: center;
+        height: 20px;
+    }
+
+    .wh_item_img  img{
+        height: 16px;
+        width: 16px;
     }
 
     .wh_jiantou1 {
@@ -158,6 +169,16 @@
                          {wh_chose_day:item.chooseDay}
                          ,setClass(item)]">
                         {{item.id}}
+                    </div>
+                    <div class="wh_item_img" v-if="item.todayDetail.isEffective">
+                        <img v-show="item.todayDetail.isPeriodStart" src="../../assets/images/periodHelper/startT.png"/>
+                        <img v-show="item.todayDetail.isPeriodEnd" src="../../assets/images/periodHelper/endT.png"/>
+                        <img v-show="item.todayDetail.hasLove" src="../../assets/images/periodHelper/love.png"/>
+                    </div>
+                    <div class="wh_item_img" v-else>
+                        <img v-show="item.todayDetail.isPeriodStart" src="../../assets/images/periodHelper/startF.png"/>
+                        <img v-show="item.todayDetail.isPeriodEnd" src="../../assets/images/periodHelper/endF.png"/>
+                        <img v-show="item.todayDetail.hasLove" src="../../assets/images/periodHelper/love.png"/>
                     </div>
                 </div>
             </div>
