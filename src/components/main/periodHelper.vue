@@ -320,16 +320,17 @@
 				let isClickDayStartPeriod = this.todayDetail.isPeriodStart;
 				let clickDay = this.todayDetail.dayTime;
 				const dateTop = this.$refs.Calendar.dateTop;
+
+				//输出今天的信息，以及向后最大周期数的日期
+				debug.print(clickDay + " period start :"+isClickDayStartPeriod);
+
 				if (isClickDayStartPeriod) {
-
-					//输出今天的信息，以及向后最大周期数的日期
-					debug.print(clickDay + " period start");
-
 					//如果今天是有效的一天
 					if (this.todayDetail.isEffective) {
-						this.todayDetail.isPeriodStart = false;
 						//获取之前的经期开始
 						let beforePeriodStart = this.getNearlyPeriodStartInEffective(dateTop, clickDay, 'pre');
+						debug.print("前开始："+beforePeriodStart);
+
 						if (beforePeriodStart) {
 							this.$confirm('将经期开始时间从' + beforePeriodStart + '修改为' + clickDay + ', 是否继续?', '提示', {
 								confirmButtonText: '确定',
@@ -363,7 +364,7 @@
 						}
 					}
 				} else {
-					debug.print(clickDay + " peroid start");
+
 					const nearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop);
 				}
 			},
@@ -397,7 +398,7 @@
 						if (timeUtil.compareDate(currMouthList[i].date, end)) {
 							debug.print("time : " + currMouthList[i].date + ",比结束日期后, 继续");
 						} else if (timeUtil.compareDate(currMouthList[i].date, start)) {
-							debug.print("time : " + currMouthList[i].date + "已经遍历超过开始日期,开始日期:" + flag);
+							debug.print("time : " + currMouthList[i].date + "已经遍历超过或者等于开始日期,开始日期:" + flag);
 							return flag;
 						} else {
 							if (currMouthList[i].todayDetail.isEffective) {
@@ -454,8 +455,8 @@
 
 				if (towards === 'pre') {
 					for (let i = currMouthList.length - 1; i > 0; i--) {
-						if (timeUtil.compareDate(currMouthList[i].date, start)) {
-							debug.print("time : " + currMouthList[i].date + "已经遍历超过开始日期,开始日期:" + flag);
+						if (timeUtil.compareDate(currMouthList[i].date, start) || currMouthList[i].date === start) {
+							debug.print("time : " + currMouthList[i].date + "已经遍历超过或者等于开始日期,开始日期:" + flag);
 						} else {
 							if (currMouthList[i].todayDetail.isEffective) {
 								debug.print("time:" + currMouthList[i].date + ",进入比较");

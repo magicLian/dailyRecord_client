@@ -4,9 +4,9 @@
 import utils from "./utils";
 
 const debug = {
-	isDebug : utils.isDebug,
-	print : function (message) {
-		if(this.isDebug){
+	isDebug: utils.isDebug,
+	print: function (message) {
+		if (this.isDebug) {
 			console.log(message);
 		}
 	}

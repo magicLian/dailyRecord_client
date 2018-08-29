@@ -3,7 +3,7 @@
  */
 
 const utils = {
-	clone : function(obj) {
+	clone: function (obj) {
 		let o;
 		if (typeof obj === "object") {
 			if (obj === null) {
