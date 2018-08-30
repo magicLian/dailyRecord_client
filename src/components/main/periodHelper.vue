@@ -315,6 +315,7 @@
 					this.$message('没有查询到本月的记录');
 				}
 			},
+
 			/**
 			 * 经期开始的触发事件
 			 * 有4种逻辑 点亮2种 ，点灭2种
@@ -362,21 +363,33 @@
 					 * 如果今天无效，则无需做什么操作直接点灭即可
 					 */
 					if (this.todayDetail.isEffective) {
-						const nearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop,clickDay,'next');
-						debug.print("有效经期结束:" + nearlyPeriodEnd);
-						const clickDayTomorrow = timeUtil.getDateAddOrMins(clickDay, 1);
-						debug.print("开始后一天："+clickDayTomorrow);
-						const yesterdayOfEnd = timeUtil.getDateAddOrMins(nearlyPeriodEnd, -1);
-						debug.print("结束前一天："+yesterdayOfEnd);
-						this.unsetDuringDate(dateTop,clickDayTomorrow, yesterdayOfEnd);
-						this.unsetSpecificDate(clickDay,true);
-						this.unsetSpecificDate(nearlyPeriodEnd,false);
+						const afterNearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop,clickDay,'next');
+						debug.print("有效经期结束:" + afterNearlyPeriodEnd);
+
+						const preNearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop,timeUtil.getDateAddOrMins(clickDay,-35),clickDay,'pre');
+						debug.print("前面无效的经期开始："+preNearlyPeriodStart);
+
+                        if(preNearlyPeriodStart){
+                            this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(preNearlyPeriodStart),preNearlyPeriodStart,afterNearlyPeriodEnd);
+                        }else{
+	                        const clickDayTomorrow = timeUtil.getDateAddOrMins(clickDay, 1);
+	                        debug.print("开始后一天："+clickDayTomorrow);
+	                        const yesterdayOfEnd = timeUtil.getDateAddOrMins(afterNearlyPeriodEnd, -1);
+	                        debug.print("结束前一天："+yesterdayOfEnd);
+
+	                        this.unsetDuringDate(dateTop,clickDayTomorrow, yesterdayOfEnd);
+	                        this.unsetSpecificDate(clickDay,true);
+	                        this.unsetSpecificDate(afterNearlyPeriodEnd,false);
+                        }
 					} else {
 						this.todayDetail.isPeriodStart = false;
 					}
 				}
 			},
-			//经期结束的触发事件
+			/**
+			 * 经期结束的触发事件
+			 * 有4种逻辑 点亮2种 ，点灭2种
+			 */
 			endPeriodChangeFunc: function () {
 				let isClickDayEndPeriod = this.todayDetail.isPeriodEnd;
 				let clickDay = this.todayDetail.dayTime;
@@ -418,28 +431,36 @@
 					if(this.todayDetail.isEffective){
                         const nearlyPeriodStart = this.getNearlyPeriodStartInEffective(dateTop,clickDay,'pre');
 						debug.print("有效经期开始:" + nearlyPeriodStart);
-						const clickDayYesterday = timeUtil.getDateAddOrMins(clickDay, -1);
-						debug.print("结束前一天："+clickDayYesterday);
-						const tomorrowOfStart = timeUtil.getDateAddOrMins(nearlyPeriodStart, 1);
-						debug.print("开始后一天："+clickDayYesterday);
-						this.unsetDuringDate(dateTop,tomorrowOfStart, clickDayYesterday);
-						this.unsetSpecificDate(clickDay,true);
-						this.unsetSpecificDate(nearlyPeriodStart,false);
+
+						const afterPeriodEnd = this.getNearlyPeriodEndWithoutEffective(dateTop,clickDay,timeUtil.getDateAddOrMins(clickDay,35),'next');
+						debug.print("后无效的结束："+afterPeriodEnd);
+						if(afterPeriodEnd){
+							this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(nearlyPeriodStart),nearlyPeriodStart,afterPeriodEnd);
+                        }else{
+							const clickDayYesterday = timeUtil.getDateAddOrMins(clickDay, -1);
+							debug.print("结束前一天："+clickDayYesterday);
+							const tomorrowOfStart = timeUtil.getDateAddOrMins(nearlyPeriodStart, 1);
+							debug.print("开始后一天："+clickDayYesterday);
+							this.unsetDuringDate(dateTop,tomorrowOfStart, clickDayYesterday);
+							this.unsetSpecificDate(clickDay,true);
+							this.unsetSpecificDate(nearlyPeriodStart,false);
+                        }
 					} else {
 						this.todayDetail.isPeriodEnd = false;
 					}
 				}
 			},
+            
 			getNearlyPeriodStartWithoutEffective: function (dateTop, start, end, towards = 'pre') {
 				let flag = null;
 				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 
 				if (towards === 'pre') {
 					for (let i = currMouthList.length - 1; i > 0; i--) {
-						if (timeUtil.compareDate(currMouthList[i].date, end)) {
-							debug.print("time : " + currMouthList[i].date + ",比结束日期后, 继续");
+						if (timeUtil.compareDate(currMouthList[i].date, end) || currMouthList[i].date === end) {
+							debug.print("time : " + currMouthList[i].date + ",等于或者大于结束日期, 继续");
 						} else if (timeUtil.compareDate(start,currMouthList[i].date)) {
-							debug.print("time : " + currMouthList[i].date + "已经遍历超过或者等于开始日期,开始日期:" + flag);
+							debug.print("time : " + currMouthList[i].date + "已经遍历小于开始日期,开始日期:" + flag);
 							return flag;
 						} else {
 							if (currMouthList[i].todayDetail.isEffective) {
@@ -449,7 +470,7 @@
 								debug.print("time:" + currMouthList[i].date + ",进入比较");
 								if (currMouthList[i].otherMonth === 'nowMonth' && currMouthList[i].todayDetail.isPeriodStart) {
 									flag = currMouthList[i].date;
-									debug.print("find period end :" + flag);
+									debug.print("find period start :" + flag);
 									return flag;
 								}
 							}
@@ -571,8 +592,8 @@
 					dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "preMonth");
 				} else if (towards === 'next') {
 					for (let j = 0; j < currMouthList.length; j++) {
-						if (timeUtil.compareDate(start, currMouthList[j].date)) {
-							debug.print("time : " + currMouthList[j].date + ",比起始日期前, 继续");
+						if (timeUtil.compareDate(start, currMouthList[j].date) || currMouthList[j].date === start) {
+							debug.print("time : " + currMouthList[j].date + ",小于或等于起始日期, 继续");
 						} else if (timeUtil.isDateBeyondToday(currMouthList[j].date)) {
 							debug.print("time : " + currMouthList[j].date + "已经超过今天,结束日期:" + flag);
 							return flag;
@@ -658,22 +679,33 @@
 				}
 			},
 			setPeriodAndForcast: function (dateTop, startDay, endDay) {
-				this.setPeriodData(dateTop, startDay, endDay);
+				this.setPeriodData(dateTop,startDay, endDay);
 				this.setForcastData(dateTop, startDay, endDay);
 			},
-			setPeriodData: function (dateTop, startDay, endDay) {
+			setPeriodData: function (dateTop,startDay, endDay) {
 				let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 				let flag = false;
 
 				for (let i = 0; i < monthList.length; i++) {
-					if (monthList[i].date === startDay) {
-						monthList[i].todayDetail.isPeriodStart = true;
-						monthList[i].todayDetail.isPeriodEnd = false;
-						monthList[i].todayDetail.isEffective = true;
-						monthList[i].todayDetail.dayType = 1;
-						monthList[i].markClassName = "periodTime";
-						monthList[i].isModifyFlag = true;
+
+					if (monthList[i].date === startDay){
+						if(monthList[i].otherMonth === 'nowMonth') {
+							monthList[i].todayDetail.isPeriodStart = true;
+							monthList[i].todayDetail.isPeriodEnd = false;
+							monthList[i].todayDetail.isEffective = true;
+							monthList[i].todayDetail.dayType = 1;
+							monthList[i].markClassName = "periodTime";
+							monthList[i].isModifyFlag = true;
+						}else {
+							monthList[i].todayDetail.isPeriodStart = false;
+							monthList[i].todayDetail.isPeriodEnd = false;
+							monthList[i].markClassName = "periodTime";
+							monthList[i].todayDetail.dayType = 1;
+							monthList[i].todayDetail.isEffective = true;
+							monthList[i].isModifyFlag = true;
+                        }
 					}
+
 					if (monthList[i].date === endDay && monthList[i].otherMonth === 'nowMonth') {
 						flag = true;
 						monthList[i].todayDetail.isPeriodStart = false;
@@ -684,6 +716,7 @@
 						monthList[i].isModifyFlag = true;
 						break;
 					}
+
 					if (timeUtil.compareDate(monthList[i].date, startDay)) {
 						monthList[i].todayDetail.isPeriodStart = false;
 						monthList[i].todayDetail.isPeriodEnd = false;
@@ -696,7 +729,7 @@
 
 				if (!flag) {
 					let after = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
-					this.setPeriodData(after, startDay, endDay);
+					this.setPeriodData(after,startDay, endDay);
 				}
 			},
 			setForcastData: function (dateTop, startDay, endDay) {
@@ -757,7 +790,7 @@
                         }
                     }
 				}
-			},
+			}
 		}
 	}
 </script>
