@@ -16,6 +16,7 @@
         </div>
         <div class="todayDetailInfo" v-show="todayDetailVisible">
             <el-form ref="form" :model="todayDetail" label-width="80px">
+                <el-form-item v-show="(todayDetail.isPeriodStart || todayDetail.isPeriodEnd) && !todayDetail.isEffective" style="color: #3a8ee6">标记无效</el-form-item>
                 <el-form-item label="经期开始">
                     <el-switch v-model="todayDetail.isPeriodStart" @change="startPeriodChangeFunc"></el-switch>
                 </el-form-item>
@@ -139,6 +140,7 @@
 	import config from '../../util/config';
 	import utils from '../../util/utils';
 	import debug from '../../util/debug'
+	import ElFormItem from "../../../node_modules/element-ui/packages/form/src/form-item.vue";
 
 	export default {
 		data() {
@@ -169,6 +171,7 @@
 			}
 		},
 		components: {
+			ElFormItem,
 			Calendar
 		},
 		mounted: function () {
@@ -733,6 +736,7 @@
 				}
 			},
 			setForcastData: function (dateTop, startDay, endDay) {
+
 			},
 			unsetDuringDate: function (dateTop, startDay, endDay) {
 				let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
@@ -925,6 +929,11 @@
 
     .ovulatoryTime {
         background-color: #ff83d3;
+        border-radius: 90px;
+    }
+
+    .ovulatoryDayTime {
+        background-color: #e47eff;
         border-radius: 90px;
     }
 </style>
