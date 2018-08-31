@@ -143,21 +143,27 @@ export default {
 		}
 		return arr;
 	},
+
 	//获取某月的列表 用于渲染
 	getMonthList: function (date) {
 		return [...this.getLeftArr(date), ...this.getMonthListNoOther(date), ...this.getRightArr(date)]
 	},
+
+	//比较时间
 	compareDate: function (date1, date2) {
 		const d1 = new Date(date1);
 		const d2 = new Date(date2);
 		return d1.valueOf() > d2.valueOf();
 	},
-	isDateBeyondToday : function (date) {
+
+	//是否超过今天
+	isDateBeyondToday: function (date) {
 		const today = this.dateFormat(new Date());
-		return this.compareDate(date,today);
+		return this.compareDate(date, today);
 	},
 
-	getDateAddOrMins:function(date,num){
+	//时间加减
+	getDateAddOrMins: function (date, num) {
 		const d = new Date(date);
 		const oldTimestamps = d.getTime();
 
