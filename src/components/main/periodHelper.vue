@@ -140,7 +140,6 @@
 	import config from '../../util/config';
 	import utils from '../../util/utils';
 	import debug from '../../util/debug'
-	import ElFormItem from "../../../node_modules/element-ui/packages/form/src/form-item.vue";
 
 	export default {
 		data() {
@@ -171,7 +170,6 @@
 			}
 		},
 		components: {
-			ElFormItem,
 			Calendar
 		},
 		mounted: function () {
@@ -417,6 +415,7 @@
 						});
                     }else{
 						const preDay = timeUtil.getDateAddOrMins(clickDay, -35);
+						debug.print("clickday:"+clickDay);
 						debug.print("pre:" + preDay);
                         const nearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop,preDay,clickDay,'pre');
                         if(nearlyPeriodStart){
@@ -736,7 +735,10 @@
 				}
 			},
 			setForcastData: function (dateTop, startDay, endDay) {
-
+//                let forcastPeriodStart = timeUtil.getDateAddOrMins(startDay,35);
+//                let forcasePeriodEnd = timeUtil.getDateAddOrMins(endDay,35);
+//                const
+//                const lastPeriodStart = this.getAfterEffectivePeriodStart()
 			},
 			unsetDuringDate: function (dateTop, startDay, endDay) {
 				let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
@@ -793,6 +795,36 @@
                     		break;
                         }
                     }
+				}
+			},
+			getAfterEffectivePeriodStart : function (dateTop,start,end) {
+				let flag = null;
+				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
+
+				for (let j = 0; j < currMouthList.length; j++) {
+					if (timeUtil.compareDate(start, currMouthList[j].date) || currMouthList[j].date === start) {
+						debug.print("time : " + currMouthList[j].date + ",比起始日期前或者等于, 继续");
+					} else if (timeUtil.isDateBeyondToday(currMouthList[j].date)) {
+						debug.print("time : " + currMouthList[j].date + "已经超过今天,结束日期:" + flag);
+						return flag;
+					} else {
+						if (currMouthList[j].todayDetail.isEffective) {
+							debug.print("time:" + currMouthList[j].date + ",进入比较");
+							if (currMouthList[j].otherMonth === 'nowMonth' && currMouthList[j].todayDetail.isPeriodStart) {
+								flag = currMouthList[j].date;
+								debug.print("find period start :" + flag);
+								return flag;
+							}
+						}
+					}
+				}
+				dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
+
+				if (timeUtil.isDateBeyondToday(dateTop + '-1') || !this.$refs.Calendar.showMonthsHistory[dateTop]) {
+					debug.print("find nothing &flag=" + flag);
+					return flag;
+				} else {
+					return this.getAfterEffectivePeriodStart(dateTop, dateTop + '-1', end);
 				}
 			}
 		}

@@ -159,8 +159,11 @@ export default {
 
 	getDateAddOrMins:function(date,num){
 		const d = new Date(date);
+		const oldTimestamps = d.getTime();
+
 		let newD = new Date();
-		newD.setDate(d.getDate() + num);
+		newD.setTime(oldTimestamps + (num * 24 * 3600 * 1000));
+
 		return this.dateFormat(newD);
 	},
 
