@@ -1,11 +1,18 @@
 <template>
     <div class="main" v-loading="loading">
+        <div class="btnContainer">
+            <el-row style="margin-left: 10px;float: left;">
+                <el-button size="medium" round @click="returnToMain">返回</el-button>
+                <!--<el-button size="medium" type="primary" round @click="saveModifyDate">保存</el-button>-->
+            </el-row>
+        </div>
         <div class="calendarContainer">
             <div class="calendarContent">
-                <Calendar ref="Calendar"
-                          :sundayStart="true"
-                          v-on:choseDay="clickDay"
-                          v-on:changeMonth="changeMouth">
+                <Calendar
+                    ref="Calendar"
+                    :sundayStart="true"
+                    v-on:choseDay="clickDay"
+                    v-on:changeMonth="changeMouth">
                 </Calendar>
             </div>
         </div>
@@ -128,7 +135,6 @@
                         </el-collapse-item>
                     </el-collapse>
                 </el-form-item>
-                <el-button type="primary" round @click="" style="margin: 20px auto">保存当天信息</el-button>
             </el-form>
         </div>
     </div>
@@ -139,7 +145,7 @@
 	import timeUtil from '../vue-calendar/calendar';
 	import config from '../../util/config';
 	import utils from '../../util/utils';
-	import debug from '../../util/debug'
+	import debug from '../../util/debug';
 
 	export default {
 		data() {
@@ -316,7 +322,6 @@
 					this.$message('没有查询到本月的记录');
 				}
 			},
-
 			/**
 			 * 经期开始的触发事件
 			 * 有4种逻辑 点亮2种 ，点灭2种
@@ -355,6 +360,16 @@
 							this.setPeriodAndForcast(dateTop, clickDay, nearlyPeriodEnd);
 						} else {
 							this.todayDetail.isPeriodStart = true;
+
+							let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
+							for (let i = 0; i < monthList.length; i++) {
+								if (monthList[i].date === clickDay){
+									monthList[i].isModifyFlag = true;
+									break;
+								}
+							}
+
+							this.todayDetail.isEffective = false;
 						}
 					}
 				} else {
@@ -383,7 +398,18 @@
 	                        this.unsetSpecificDate(afterNearlyPeriodEnd,false);
                         }
 					} else {
+						//没找到经期结束,则先把今天标记为经期开始,已修改,无效
 						this.todayDetail.isPeriodStart = false;
+
+						let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
+						for (let i = 0; i < monthList.length; i++) {
+							if (monthList[i].date === clickDay){
+								monthList[i].isModifyFlag = true;
+								break;
+                            }
+                        }
+
+                        this.todayDetail.isEffective = false;
 					}
 				}
 			},
@@ -452,7 +478,6 @@
 					}
 				}
 			},
-            
 			getNearlyPeriodStartWithoutEffective: function (dateTop, start, end, towards = 'pre') {
 				let flag = null;
 				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
@@ -826,6 +851,15 @@
 				} else {
 					return this.getAfterEffectivePeriodStart(dateTop, dateTop + '-1', end);
 				}
+			},
+            saveCurrentMouthDateRecord : function(){
+                console.log("aaaaaaaaaaa");
+                let dateTop = this.$refs.Calendar.dateTop;
+
+
+            },
+			returnToMain : function () {
+				this.saveCurrentMouthDateRecord();
 			}
 		}
 	}
@@ -837,17 +871,22 @@
         background: #f05c7000;
     }
 
+    .btnContainer{
+        width: 100%;
+        max-height: 100px;
+        float: left;
+        margin-top: 10px;
+    }
+
     .calendarContainer {
         width: 100%;
         max-width: 800px;
-        height: 50%;
         min-height: 380px;
         margin: 0 auto;
     }
 
     .calendarContent {
         width: 100%;
-        height: 100%;
         background: #dedede;
         float: left;
         margin: 0 auto;
