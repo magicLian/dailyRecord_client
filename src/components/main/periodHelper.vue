@@ -298,11 +298,12 @@
 				const resultData = this.currMouthRecordList;
 				let chooseMouthList = this.$refs.Calendar.chooseMonth;
 
-				if (resultData.length != 0) {
+				if (resultData.length !== 0) {
 					for (let i = 0; i < resultData.length; i++) {
 						let dataToVue = this.formateJavaDayDataToVue(resultData[i]);
 						for (let j = 0; j < chooseMouthList.length; j++) {
-							if (chooseMouthList[j].date === dataToVue.dayTime) {
+							if (!chooseMouthList[j].isModifyFlag && chooseMouthList[j].date === dataToVue.dayTime) {
+								//如果没有修改过，才进行回填
 								if (dataToVue.dayType === 1) {
 									chooseMouthList[j].markClassName = 'periodTime';
 								}
@@ -852,14 +853,43 @@
 					return this.getAfterEffectivePeriodStart(dateTop, dateTop + '-1', end);
 				}
 			},
-            saveCurrentMouthDateRecord : function(){
-                console.log("aaaaaaaaaaa");
-                let dateTop = this.$refs.Calendar.dateTop;
+            saveAllMouthDateRecord : function(){
+                let saveList = null;
+	            let self = this;
+                let showMouthHistory = self.$refs.showMonthsHistory;
+	            Object.keys(showMouthHistory).forEach(function(mouth){
+		            showMouthHistory[mouth].forEach(function (day,index) {
+                        if(day.isModifyFlag){
+	                        saveList.push(day.todayDetail);
+                        }
+		            });
+	            });
+	            $.ajax({
+		            type: "post",
+		            url: config.baseUrl + "/api/record/saveMouthRecord",
+		            data: saveList
+	            }).done(function (result) {
+		            self.loading = false;
+		            if (result.code === 200) {
+
+		            } else {
+			            self.$message({
+				            message: "加载数据失败",
+				            type: "error"
+			            });
+		            }
+	            }).fail(function () {
+		            self.loading = false;
+		            self.$message({
+			            message: "加载数据失败",
+			            type: "error"
+		            });
+	            });
 
 
             },
 			returnToMain : function () {
-				this.saveCurrentMouthDateRecord();
+				this.saveAllMouthDateRecord();
 			}
 		}
 	}
