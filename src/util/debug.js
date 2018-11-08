@@ -1,10 +1,10 @@
 /**
  * debug
  */
-import utils from "./utils";
+import config from "./config";
 
 const debug = {
-	isDebug: utils.isDebug,
+	isDebug: config.isDebug,
 	print: function (message) {
 		if (this.isDebug) {
 			console.log(message);

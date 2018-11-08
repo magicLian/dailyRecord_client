@@ -4,7 +4,8 @@
 
 
 const config = {
-	baseUrl : "http://localhost:8081"
+	baseUrl : "http://localhost:8081",
+	debug : true
 };
 
 export default config

@@ -25,8 +25,7 @@ const utils = {
 			o = obj;
 		}
 		return o;
-	},
-	isDebug: true
+	}
 };
 
 export default utils
