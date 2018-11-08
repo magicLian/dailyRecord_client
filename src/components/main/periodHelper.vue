@@ -9,10 +9,10 @@
         <div class="calendarContainer">
             <div class="calendarContent">
                 <Calendar
-                    ref="Calendar"
-                    :sundayStart="true"
-                    v-on:choseDay="clickDay"
-                    v-on:changeMonth="changeMouth">
+                        ref="Calendar"
+                        :sundayStart="true"
+                        v-on:choseDay="clickDay"
+                        v-on:changeMonth="changeMouth">
                 </Calendar>
             </div>
         </div>
@@ -23,7 +23,10 @@
         </div>
         <div class="todayDetailInfo" v-show="todayDetailVisible">
             <el-form ref="form" :model="todayDetail" label-width="80px">
-                <el-form-item v-show="(todayDetail.isPeriodStart || todayDetail.isPeriodEnd) && !todayDetail.isEffective" style="color: #3a8ee6">标记无效</el-form-item>
+                <el-form-item
+                        v-show="(todayDetail.isPeriodStart || todayDetail.isPeriodEnd) && !todayDetail.isEffective"
+                        style="color: #3a8ee6">标记无效
+                </el-form-item>
                 <el-form-item label="经期开始">
                     <el-switch v-model="todayDetail.isPeriodStart" @change="startPeriodChangeFunc"></el-switch>
                 </el-form-item>
@@ -153,8 +156,11 @@
 				loading: false,
 				todayDetailVisible: false,
 				currMouthRecordList: [],
+				//新增的信息记录，用于回填id
+				currRecordInsertList: [],
 				todayDetail: {
 					id: '',
+					userId: '',
 					dayTime: '',
 					dayType: '',
 					hasLove: false,
@@ -200,7 +206,7 @@
 					self.loading = false;
 					if (result.code === 200) {
 						self.currMouthRecordList = result.data;
-						self.storeMouthRecordInHistoryList();
+						self.storeMouthRecordInHistoryList(false);
 					} else {
 						self.$message({
 							message: "加载数据失败",
@@ -254,6 +260,7 @@
 			formateJavaDayDataToVue: function (data) {
 				let todayDetail = {};
 				todayDetail.id = data.id;
+				todayDetail.userId = data.userId;
 				todayDetail.dayType = data.dayType;
 				todayDetail.dayTime = timeUtil.dateFormat(data.dayTime);
 				todayDetail.hasLove = data.hasLove === 1;
@@ -276,16 +283,24 @@
 			//转化数据类型（Vue - Java）
 			formateVueDayDataToJava: function (data) {
 				let returnData = utils.clone(data);
-				returnData.periodShape = JSON.stringify(returnData.periodShape);
-				returnData.head = JSON.stringify(returnData.head);
-				returnData.body = JSON.stringify(returnData.body);
-				returnData.privateTh = JSON.stringify(returnData.privateTh);
-				returnData.whitePip = JSON.stringify(returnData.whitePip);
-				returnData.stomach = JSON.stringify(returnData.stomach);
-				returnData.tought = JSON.stringify(returnData.tought);
+				returnData.id = returnData.id === "" ? null : returnData.id;
+				returnData.userId = returnData.userId === "" ? null : returnData.userId;
+				returnData.dayTime = new Date(returnData.dayTime);
+				returnData.periodShape = returnData.periodShape.length === 0 ? null : JSON.stringify(returnData.periodShape);
+				returnData.head = returnData.head.length === 0 ? null : JSON.stringify(returnData.head);
+				returnData.body = returnData.body.length === 0 ? null : JSON.stringify(returnData.body);
+				returnData.privateTh = returnData.privateTh.length === 0 ? null : JSON.stringify(returnData.privateTh);
+				returnData.whitePip = returnData.whitePip.length === 0 ? null : JSON.stringify(returnData.whitePip);
+				returnData.stomach = returnData.stomach.length === 0 ? null : JSON.stringify(returnData.stomach);
+				returnData.tought = returnData.tought.length === 0 ? null : JSON.stringify(returnData.tought);
 				returnData.hasLove = returnData.hasLove === true ? 1 : 0;
 				returnData.isPeriodStart = returnData.isPeriodStart === true ? 1 : 0;
 				returnData.isPeriodEnd = returnData.isPeriodEnd === true ? 1 : 0;
+				returnData.isEffective = returnData.isEffective === true ? 1 : 0;
+				returnData.note = returnData.note === "" ? null : returnData.note;
+				returnData.periodHurt = returnData.periodHurt === "" ? null : returnData.periodHurt;
+				returnData.flowQuality = returnData.flowQuality === "" ? null : returnData.flowQuality;
+				returnData.bloodColor = returnData.bloodColor === "" ? null : returnData.bloodColor;
 				return returnData;
 			},
 			//预测下月
@@ -323,6 +338,29 @@
 					this.$message('没有查询到本月的记录');
 				}
 			},
+			//回填插入的record id
+			storeMouthRecordIdInHistoryList: function () {
+				const dateTop = this.$refs.Calendar.dateTop;
+				const resultData = this.currRecordInsertList;
+				let chooseMouthList = this.$refs.Calendar.chooseMonth;
+
+				let monthDuringArr = this.getRecordMonthDuring(resultData);
+
+				if (resultData.length !== 0) {
+					for (let i = 0; i < resultData.length; i++) {
+						let dataToVue = this.formateJavaDayDataToVue(resultData[i]);
+						for (let j = 0; j < chooseMouthList.length; j++) {
+							//回填id，只回填到正式日期上
+							if (chooseMouthList[j].otherMonth === 'nowMouth' && chooseMouthList[j].date === dataToVue.dayTime) {
+								chooseMouthList[j].todayDetail.id = dataToVue.id;
+								break;
+							}
+						}
+					}
+					this.$refs.Calendar.chooseMonth = chooseMouthList;
+					this.$refs.Calendar.showMonthsHistory[dateTop] = chooseMouthList;
+				}
+			},
 			/**
 			 * 经期开始的触发事件
 			 * 有4种逻辑 点亮2种 ，点灭2种
@@ -345,13 +383,13 @@
 						let beforePeriodStart = this.getNearlyPeriodStartInEffective(dateTop, clickDay, 'pre');
 						debug.print("前开始：" + beforePeriodStart);
 
-                        const endDay = timeUtil.getDateAddOrMins(clickDay, -1);
-                        this.unsetDuringDate(dateTop, beforePeriodStart, endDay);
-                        this.todayDetail.isPeriodStart = true;
-                        this.$message({
-                            type: 'success',
-                            message: '设置经期开始成功!'
-                        });
+						const endDay = timeUtil.getDateAddOrMins(clickDay, -1);
+						this.unsetDuringDate(dateTop, beforePeriodStart, endDay);
+						this.todayDetail.isPeriodStart = true;
+						this.$message({
+							type: 'success',
+							message: '设置经期开始成功!'
+						});
 					} else {
 						const endDay = timeUtil.getDateAddOrMins(clickDay, 35);
 						debug.print("end:" + endDay);
@@ -364,7 +402,7 @@
 
 							let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 							for (let i = 0; i < monthList.length; i++) {
-								if (monthList[i].date === clickDay){
+								if (monthList[i].date === clickDay) {
 									monthList[i].isModifyFlag = true;
 									break;
 								}
@@ -380,37 +418,37 @@
 					 * 如果今天无效，则无需做什么操作直接点灭即可
 					 */
 					if (this.todayDetail.isEffective) {
-						const afterNearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop,clickDay,'next');
+						const afterNearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop, clickDay, 'next');
 						debug.print("有效经期结束:" + afterNearlyPeriodEnd);
 
-						const preNearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop,timeUtil.getDateAddOrMins(clickDay,-35),clickDay,'pre');
-						debug.print("前面无效的经期开始："+preNearlyPeriodStart);
+						const preNearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop, timeUtil.getDateAddOrMins(clickDay, -35), clickDay, 'pre');
+						debug.print("前面无效的经期开始：" + preNearlyPeriodStart);
 
-                        if(preNearlyPeriodStart){
-                            this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(preNearlyPeriodStart),preNearlyPeriodStart,afterNearlyPeriodEnd);
-                        }else{
-	                        const clickDayTomorrow = timeUtil.getDateAddOrMins(clickDay, 1);
-	                        debug.print("开始后一天："+clickDayTomorrow);
-	                        const yesterdayOfEnd = timeUtil.getDateAddOrMins(afterNearlyPeriodEnd, -1);
-	                        debug.print("结束前一天："+yesterdayOfEnd);
+						if (preNearlyPeriodStart) {
+							this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(preNearlyPeriodStart), preNearlyPeriodStart, afterNearlyPeriodEnd);
+						} else {
+							const clickDayTomorrow = timeUtil.getDateAddOrMins(clickDay, 1);
+							debug.print("开始后一天：" + clickDayTomorrow);
+							const yesterdayOfEnd = timeUtil.getDateAddOrMins(afterNearlyPeriodEnd, -1);
+							debug.print("结束前一天：" + yesterdayOfEnd);
 
-	                        this.unsetDuringDate(dateTop,clickDayTomorrow, yesterdayOfEnd);
-	                        this.unsetSpecificDate(clickDay,true);
-	                        this.unsetSpecificDate(afterNearlyPeriodEnd,false);
-                        }
+							this.unsetDuringDate(dateTop, clickDayTomorrow, yesterdayOfEnd);
+							this.unsetSpecificDate(clickDay, true);
+							this.unsetSpecificDate(afterNearlyPeriodEnd, false);
+						}
 					} else {
 						//没找到经期结束,则先把今天标记为经期开始,已修改,无效
 						this.todayDetail.isPeriodStart = false;
 
 						let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 						for (let i = 0; i < monthList.length; i++) {
-							if (monthList[i].date === clickDay){
+							if (monthList[i].date === clickDay) {
 								monthList[i].isModifyFlag = true;
 								break;
-                            }
-                        }
+							}
+						}
 
-                        this.todayDetail.isEffective = false;
+						this.todayDetail.isEffective = false;
 					}
 				}
 			},
@@ -423,57 +461,57 @@
 				let clickDay = this.todayDetail.dayTime;
 				const dateTop = this.$refs.Calendar.dateTop;
 
-				debug.print(clickDay + " peroid end:"+isClickDayEndPeriod);
+				debug.print(clickDay + " peroid end:" + isClickDayEndPeriod);
 
 				if (isClickDayEndPeriod) {
 					/** 结束点亮
-                     *  如果当天是有效时间，则查找它后面的结束时间，并给之后的时间重置，给当天设置结束
-                     *  如果不是有效时间,则需要查找它之前的开始时间，有则连接，无则点灰
+					 *  如果当天是有效时间，则查找它后面的结束时间，并给之后的时间重置，给当天设置结束
+					 *  如果不是有效时间,则需要查找它之前的开始时间，有则连接，无则点灰
 					 */
-					if(this.todayDetail.isEffective){
-						const nearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop,clickDay,'next');
-						debug.print("后结束："+nearlyPeriodEnd);
-						const tomorrow = timeUtil.getDateAddOrMins(clickDay,1);
-                        this.unsetDuringDate(dateTop,tomorrow,nearlyPeriodEnd);
-                        this.todayDetail.isPeriodEnd = true;
+					if (this.todayDetail.isEffective) {
+						const nearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop, clickDay, 'next');
+						debug.print("后结束：" + nearlyPeriodEnd);
+						const tomorrow = timeUtil.getDateAddOrMins(clickDay, 1);
+						this.unsetDuringDate(dateTop, tomorrow, nearlyPeriodEnd);
+						this.todayDetail.isPeriodEnd = true;
 						this.$message({
 							type: 'success',
 							message: '设置经期结束成功!'
 						});
-                    }else{
+					} else {
 						const preDay = timeUtil.getDateAddOrMins(clickDay, -35);
-						debug.print("clickday:"+clickDay);
+						debug.print("clickday:" + clickDay);
 						debug.print("pre:" + preDay);
-                        const nearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop,preDay,clickDay,'pre');
-                        if(nearlyPeriodStart){
-	                        this.setPeriodAndForcast(dateTop, nearlyPeriodStart, clickDay);
-                        }else{
-	                        this.todayDetail.isPeriodEnd = true;
-                        }
-                    }
+						const nearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop, preDay, clickDay, 'pre');
+						if (nearlyPeriodStart) {
+							this.setPeriodAndForcast(dateTop, nearlyPeriodStart, clickDay);
+						} else {
+							this.todayDetail.isPeriodEnd = true;
+						}
+					}
 				} else {
 					/**
-                     * 结束点灰
-                     *  如果是有效时间，则寻找有效开始,重置开始的下一天到结束的上一天，保留开始日
-                     *  如果不是有效时间，则撤销结束
+					 * 结束点灰
+					 *  如果是有效时间，则寻找有效开始,重置开始的下一天到结束的上一天，保留开始日
+					 *  如果不是有效时间，则撤销结束
 					 */
-					if(this.todayDetail.isEffective){
-                        const nearlyPeriodStart = this.getNearlyPeriodStartInEffective(dateTop,clickDay,'pre');
+					if (this.todayDetail.isEffective) {
+						const nearlyPeriodStart = this.getNearlyPeriodStartInEffective(dateTop, clickDay, 'pre');
 						debug.print("有效经期开始:" + nearlyPeriodStart);
 
-						const afterPeriodEnd = this.getNearlyPeriodEndWithoutEffective(dateTop,clickDay,timeUtil.getDateAddOrMins(clickDay,35),'next');
-						debug.print("后无效的结束："+afterPeriodEnd);
-						if(afterPeriodEnd){
-							this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(nearlyPeriodStart),nearlyPeriodStart,afterPeriodEnd);
-                        }else{
+						const afterPeriodEnd = this.getNearlyPeriodEndWithoutEffective(dateTop, clickDay, timeUtil.getDateAddOrMins(clickDay, 35), 'next');
+						debug.print("后无效的结束：" + afterPeriodEnd);
+						if (afterPeriodEnd) {
+							this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(nearlyPeriodStart), nearlyPeriodStart, afterPeriodEnd);
+						} else {
 							const clickDayYesterday = timeUtil.getDateAddOrMins(clickDay, -1);
-							debug.print("结束前一天："+clickDayYesterday);
+							debug.print("结束前一天：" + clickDayYesterday);
 							const tomorrowOfStart = timeUtil.getDateAddOrMins(nearlyPeriodStart, 1);
-							debug.print("开始后一天："+clickDayYesterday);
-							this.unsetDuringDate(dateTop,tomorrowOfStart, clickDayYesterday);
-							this.unsetSpecificDate(clickDay,true);
-							this.unsetSpecificDate(nearlyPeriodStart,false);
-                        }
+							debug.print("开始后一天：" + clickDayYesterday);
+							this.unsetDuringDate(dateTop, tomorrowOfStart, clickDayYesterday);
+							this.unsetSpecificDate(clickDay, true);
+							this.unsetSpecificDate(nearlyPeriodStart, false);
+						}
 					} else {
 						this.todayDetail.isPeriodEnd = false;
 					}
@@ -487,7 +525,7 @@
 					for (let i = currMouthList.length - 1; i > 0; i--) {
 						if (timeUtil.compareDate(currMouthList[i].date, end) || currMouthList[i].date === end) {
 							debug.print("time : " + currMouthList[i].date + ",等于或者大于结束日期, 继续");
-						} else if (timeUtil.compareDate(start,currMouthList[i].date)) {
+						} else if (timeUtil.compareDate(start, currMouthList[i].date)) {
 							debug.print("time : " + currMouthList[i].date + "已经遍历小于开始日期,开始日期:" + flag);
 							return flag;
 						} else {
@@ -707,31 +745,31 @@
 				}
 			},
 			setPeriodAndForcast: function (dateTop, startDay, endDay) {
-				this.setPeriodData(dateTop,startDay, endDay);
+				this.setPeriodData(dateTop, startDay, endDay);
 				this.setForcastData(dateTop, startDay, endDay);
 			},
-			setPeriodData: function (dateTop,startDay, endDay) {
+			setPeriodData: function (dateTop, startDay, endDay) {
 				let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 				let flag = false;
 
 				for (let i = 0; i < monthList.length; i++) {
 
-					if (monthList[i].date === startDay){
-						if(monthList[i].otherMonth === 'nowMonth') {
+					if (monthList[i].date === startDay) {
+						if (monthList[i].otherMonth === 'nowMonth') {
 							monthList[i].todayDetail.isPeriodStart = true;
 							monthList[i].todayDetail.isPeriodEnd = false;
 							monthList[i].todayDetail.isEffective = true;
 							monthList[i].todayDetail.dayType = 1;
 							monthList[i].markClassName = "periodTime";
 							monthList[i].isModifyFlag = true;
-						}else {
+						} else {
 							monthList[i].todayDetail.isPeriodStart = false;
 							monthList[i].todayDetail.isPeriodEnd = false;
 							monthList[i].markClassName = "periodTime";
 							monthList[i].todayDetail.dayType = 1;
 							monthList[i].todayDetail.isEffective = true;
 							monthList[i].isModifyFlag = true;
-                        }
+						}
 					}
 
 					if (monthList[i].date === endDay && monthList[i].otherMonth === 'nowMonth') {
@@ -757,7 +795,7 @@
 
 				if (!flag) {
 					let after = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
-					this.setPeriodData(after,startDay, endDay);
+					this.setPeriodData(after, startDay, endDay);
 				}
 			},
 			setForcastData: function (dateTop, startDay, endDay) {
@@ -808,22 +846,22 @@
 				const dateTop = timeUtil.dateFormatWithoutDay(day);
 				let monthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 				if (monthList !== null) {
-                    for(let i=0;i<monthList.length;i++){
-                    	if(monthList[i].date === day){
-                    		monthList[i].todayDetail.isEffective = false;
-		                    monthList[i].isModifyFlag = true;
-		                    monthList[i].markClassName = "";
-		                    monthList[i].todayDetail.dayType = "";
-                    		if(isAll){
-			                    monthList[i].todayDetail.isPeriodStart = false;
-			                    monthList[i].todayDetail.isPeriodEnd = false;
-                            }
-                    		break;
-                        }
-                    }
+					for (let i = 0; i < monthList.length; i++) {
+						if (monthList[i].date === day) {
+							monthList[i].todayDetail.isEffective = false;
+							monthList[i].isModifyFlag = true;
+							monthList[i].markClassName = "";
+							monthList[i].todayDetail.dayType = "";
+							if (isAll) {
+								monthList[i].todayDetail.isPeriodStart = false;
+								monthList[i].todayDetail.isPeriodEnd = false;
+							}
+							break;
+						}
+					}
 				}
 			},
-			getAfterEffectivePeriodStart : function (dateTop,start,end) {
+			getAfterEffectivePeriodStart: function (dateTop, start, end) {
 				let flag = null;
 				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 
@@ -853,43 +891,82 @@
 					return this.getAfterEffectivePeriodStart(dateTop, dateTop + '-1', end);
 				}
 			},
-            saveAllMouthDateRecord : function(){
-                let saveList = null;
-	            let self = this;
-                let showMouthHistory = self.$refs.showMonthsHistory;
-	            Object.keys(showMouthHistory).forEach(function(mouth){
-		            showMouthHistory[mouth].forEach(function (day,index) {
-                        if(day.isModifyFlag){
-	                        saveList.push(day.todayDetail);
-                        }
-		            });
-	            });
-	            $.ajax({
-		            type: "post",
-		            url: config.baseUrl + "/api/record/saveMouthRecord",
-		            data: saveList
-	            }).done(function (result) {
-		            self.loading = false;
-		            if (result.code === 200) {
+			saveAllMouthDateRecord: function () {
+				let saveList = [];
+				let self = this;
+				self.loading = true;
 
-		            } else {
-			            self.$message({
-				            message: "加载数据失败",
-				            type: "error"
-			            });
-		            }
-	            }).fail(function () {
-		            self.loading = false;
-		            self.$message({
-			            message: "加载数据失败",
-			            type: "error"
-		            });
-	            });
+				let showMouthHistory = self.$refs.Calendar.showMonthsHistory;
+				Object.keys(showMouthHistory).forEach(function (mouth) {
+					showMouthHistory[mouth].forEach(function (day, index) {
+						if (day.isModifyFlag) {
+							saveList.push(day.todayDetail);
+						}
+					});
+				});
 
+				for (let i = 0; i < saveList.length; i++) {
+					saveList[i] = self.formateVueDayDataToJava(saveList[i]);
+				}
 
-            },
-			returnToMain : function () {
+				console.log("saveList :" + saveList);
+
+				let params = {
+					"recordList": JSON.stringify(saveList)
+				};
+
+				$.ajax({
+					type: "post",
+					url: config.baseUrl + "/api/record/saveDayRecordsList",
+					data: params,
+				}).done(function (result) {
+					self.loading = false;
+
+					if (result.code === 200) {
+						self.currRecordInsertList = result.data;
+						self.storeMouthRecordIdInHistoryList(result.data);
+						self.$message({
+							message: "保存数据成功",
+							type: "success"
+						});
+					} else {
+						self.$message({
+							message: "保存数据失败",
+							type: "error"
+						});
+					}
+				}).fail(function () {
+					self.loading = false;
+					self.$message({
+						message: "加载数据失败",
+						type: "error"
+					});
+				});
+			},
+			returnToMain: function () {
 				this.saveAllMouthDateRecord();
+			},
+			getRecordMinMonth: function (data) {
+				let min = data[0].dayTime;
+				for (let i = 1; i < data.length; i++) {
+					if (min > data[i].dayTime) {
+						min = data[i].dayTime;
+					}
+				}
+				return timeUtil.dateFormatWithoutDay(min)
+
+			},
+			getRecordMaxMonth: function (data) {
+				let max = data[0].dayTime;
+				for (let i = 1; i < data.length; i++) {
+					if (max < data[i].dayTime) {
+						max = data[i].dayTime;
+					}
+				}
+				return timeUtil.dateFormatWithoutDay(max)
+			},
+			getRecordMonthDuring: function (data) {
+                return [this.getRecordMinMonth(data),this.getRecordMaxMonth(data)];
 			}
 		}
 	}
@@ -901,7 +978,7 @@
         background: #f05c7000;
     }
 
-    .btnContainer{
+    .btnContainer {
         width: 100%;
         max-height: 100px;
         float: left;

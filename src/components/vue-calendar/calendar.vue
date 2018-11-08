@@ -199,6 +199,7 @@
 				showMonthsHistory: {},
 				todayDetail: {
 					id: '',
+					userId : '',
 					dayTime: '',
 					dayType: '',
 					hasLove: false,
