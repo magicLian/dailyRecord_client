@@ -3,7 +3,6 @@
         <div class="btnContainer">
             <el-row style="margin-left: 10px;float: left;">
                 <el-button size="medium" round @click="returnToMain">返回</el-button>
-                <!--<el-button size="medium" type="primary" round @click="saveModifyDate">保存</el-button>-->
             </el-row>
         </div>
         <div class="calendarContainer">
@@ -190,8 +189,8 @@
 		},
 		methods: {
 			/**
-             * 获取月历的数据库记录
-             **/
+			 * 获取月历的数据库记录
+			 **/
 			getMouthRecord: function () {
 				let self = this;
 				self.loading = false;
@@ -224,9 +223,9 @@
 				});
 			},
 
-            /**
-             * 选中那天的触发事件
-             **/
+			/**
+			 * 选中那天的触发事件
+			 **/
 			clickDay(data) {
 				this.$message('选中了' + data);
 				const today = new Date();
@@ -239,10 +238,10 @@
 				}
 			},
 
-            /**
-             *
-             * 月份改变的触发事件
-             **/
+			/**
+			 *
+			 * 月份改变的触发事件
+			 **/
 			changeMouth(data) {
 				this.$message('切换到的月份为' + data);
 				const today = new Date();
@@ -256,9 +255,9 @@
 			},
 
 			/**
-             * 获取选中那天的信息从历史月历对象中
-             **/
-            getClickDayInfo: function (data) {
+			 * 获取选中那天的信息从历史月历对象中
+			 **/
+			getClickDayInfo: function (data) {
 				//从对象中获取点击那天的记录
 				let mouthShowList = this.$refs.Calendar.chooseMonth;
 				for (let i = 0; i < mouthShowList.length; i++) {
@@ -270,8 +269,8 @@
 			},
 
 			/**
-             * 转化数据类型（Java - Vue）
-             **/
+			 * 转化数据类型（Java - Vue）
+			 **/
 			formateJavaDayDataToVue: function (data) {
 				let todayDetail = {};
 				todayDetail.id = data.id;
@@ -296,9 +295,9 @@
 				return todayDetail;
 			},
 
-            /**
-             * 转化数据类型（Vue - Java）
-             **/
+			/**
+			 * 转化数据类型（Vue - Java）
+			 **/
 			formateVueDayDataToJava: function (data) {
 				let returnData = utils.clone(data);
 				returnData.id = returnData.id === "" ? null : returnData.id;
@@ -323,16 +322,16 @@
 			},
 
 			/**
-             * 预测下月
-             **/
+			 * 预测下月
+			 **/
 			forcastFunture: function (mouthType) {
 
 			},
 
 			/**
-             * 合并数据库中的月历信息到历史月历对象中,显示月历的日期事件颜色
-             **/
-            storeMouthRecordInHistoryList: function () {
+			 * 合并数据库中的月历信息到历史月历对象中,显示月历的日期事件颜色
+			 **/
+			storeMouthRecordInHistoryList: function () {
 				const dateTop = this.$refs.Calendar.dateTop;
 				const resultData = this.currMouthRecordList;
 				let chooseMouthList = this.$refs.Calendar.chooseMonth;
@@ -363,31 +362,42 @@
 				}
 			},
 
-            /**
-             *
-             * 回填插入的record id
-             **/
+			/**
+			 *
+			 * 回填插入的record id
+			 **/
 			storeMouthRecordIdInHistoryList: function () {
-				const dateTop = this.$refs.Calendar.dateTop;
-				const resultData = this.currRecordInsertList;
-				let chooseMouthList = this.$refs.Calendar.chooseMonth;
-
-				let monthDuringArr = this.getRecordMonthDuring(resultData);
+				let self = this;
+				const dateTop = self.$refs.Calendar.dateTop;
+				const resultData = self.currRecordInsertList;
 
 				if (resultData.length !== 0) {
-					for (let i = 0; i < resultData.length; i++) {
-						let dataToVue = this.formateJavaDayDataToVue(resultData[i]);
-						for (let j = 0; j < chooseMouthList.length; j++) {
-							//回填id，只回填到正式日期上
-							if (chooseMouthList[j].otherMonth === 'nowMouth' && chooseMouthList[j].date === dataToVue.dayTime) {
-								chooseMouthList[j].todayDetail.id = dataToVue.id;
-								break;
-							}
-						}
-					}
-					this.$refs.Calendar.chooseMonth = chooseMouthList;
-					this.$refs.Calendar.showMonthsHistory[dateTop] = chooseMouthList;
-				}
+					let monthDuringArr = self.getRecordMonthDuring(resultData);
+					let currentMonth = monthDuringArr[0];
+                    let chooseMonthList = self.$refs.Calendar.showMonthsHistory[currentMonth];
+
+                    for (let i = 0; i < resultData.length; i++) {
+
+                    	if(monthDuringArr.length > 1 && timeUtil.compareDate(timeUtil.dateFormatWithoutDay(resultData[i].dayTime),monthDuringArr[0])){
+		                    self.$refs.Calendar.showMonthsHistory[currentMonth] = chooseMonthList;
+		                    currentMonth = timeUtil.getOtherMonthFormatWithoutDay(resultData[i].dayTime);
+		                    chooseMonthList = self.$refs.Calendar.showMonthsHistory[currentMonth];
+                        }
+
+                        //循环该月
+                        for (let j = 0; j < chooseMonthList.length; j++) {
+                            //回填id，只回填到正式日期上
+                            if (chooseMonthList[j].otherMonth === 'nowMonth'
+                                    && timeUtil.dateFormat(chooseMonthList[j].date) === timeUtil.dateFormat(resultData[i].dayTime)) {
+	                            chooseMonthList[j].todayDetail.id = resultData[i].id;
+	                            chooseMonthList[j].isModifyFlag = false;
+                                break;
+                            }
+                        }
+                    }
+					self.$refs.Calendar.showMonthsHistory[currentMonth] = chooseMonthList;
+					self.$refs.Calendar.chooseMonth = self.$refs.Calendar.showMonthsHistory[dateTop];
+                }
 			},
 			/**
 			 * 经期开始的触发事件
@@ -546,14 +556,14 @@
 				}
 			},
 
-            /**
-             *
+			/**
+			 *
 			 * @param dateTop
 			 * @param start
 			 * @param end
 			 * @param towards
 			 * @returns {*}
-             * 获取最近的经期开始，忽略是否有效
+			 * 获取最近的经期开始，忽略是否有效
 			 */
 			getNearlyPeriodStartWithoutEffective: function (dateTop, start, end, towards = 'pre') {
 				let flag = null;
@@ -617,12 +627,12 @@
 			},
 
 			/**
-             *
+			 *
 			 * @param dateTop
 			 * @param start
 			 * @param towards
 			 * @returns {*}
-             * 获取最近的经期开始，遇到有效的经期时结束
+			 * 获取最近的经期开始，遇到有效的经期时结束
 			 */
 			getNearlyPeriodStartInEffective: function (dateTop, start, towards = 'pre') {
 				let flag = null;
@@ -679,13 +689,13 @@
 			},
 
 			/**
-             *
+			 *
 			 * @param dateTop
 			 * @param start
 			 * @param end
 			 * @param towards
 			 * @returns {*}
-             * 获取最近的经期结束，忽略有效经期
+			 * 获取最近的经期结束，忽略有效经期
 			 */
 			getNearlyPeriodEndWithoutEffective: function (dateTop, start, end, towards = 'pre') {
 				let flag = null;
@@ -749,12 +759,12 @@
 			},
 
 			/**
-             *
+			 *
 			 * @param dateTop
 			 * @param start
 			 * @param towards
 			 * @returns {*}
-             * 获取最近的经期结束，遇到有效的经期时结束
+			 * 获取最近的经期结束，遇到有效的经期时结束
 			 */
 			getNearlyPeriodEndInEffective: function (dateTop, start, towards = 'pre') {
 				let flag = null;
@@ -811,7 +821,7 @@
 				}
 			},
 
-            setPeriodAndForcast: function (dateTop, startDay, endDay) {
+			setPeriodAndForcast: function (dateTop, startDay, endDay) {
 				this.setPeriodData(dateTop, startDay, endDay);
 				this.setForcastData(dateTop, startDay, endDay);
 			},
@@ -960,7 +970,7 @@
 			},
 
 			/**
-             * 保存
+			 * 保存
 			 */
 			saveAllMouthDateRecord: function () {
 				let saveList = [];
@@ -1016,22 +1026,22 @@
 			},
 
 			/**
-             * 返回
+			 * 返回
 			 */
 			returnToMain: function () {
 				this.saveAllMouthDateRecord();
 			},
 
 			/**
-             *
+			 *
 			 * @param data
 			 * @returns {*}
-             * 根据data，返回data arr的最小月份
+			 * 根据data，返回data arr的最小月份
 			 */
 			getRecordMinMonth: function (data) {
 				let min = data[0].dayTime;
 				for (let i = 1; i < data.length; i++) {
-					if (min > data[i].dayTime) {
+					if (timeUtil.compareDate(min, data[i].dayTime)) {
 						min = data[i].dayTime;
 					}
 				}
@@ -1040,15 +1050,15 @@
 			},
 
 			/**
-             *
+			 *
 			 * @param data
 			 * @returns {*}
-             * 根据data，返回data arr的最大月份
+			 * 根据data，返回data arr的最大月份
 			 */
 			getRecordMaxMonth: function (data) {
 				let max = data[0].dayTime;
 				for (let i = 1; i < data.length; i++) {
-					if (max < data[i].dayTime) {
+					if (timeUtil.compareDate(data[i].dayTime, max)) {
 						max = data[i].dayTime;
 					}
 				}
@@ -1056,13 +1066,19 @@
 			},
 
 			/**
-             *
+			 *
 			 * @param data
 			 * @returns {[null,null]}
-             * 根据data,返回Arr[最小月，最大月]
+			 * 根据data,返回Arr[最小月，最大月],如果只有1个月 则返回数组length=1
 			 */
 			getRecordMonthDuring: function (data) {
-                return [this.getRecordMinMonth(data),this.getRecordMaxMonth(data)];
+				let min = this.getRecordMinMonth(data);
+				let max = this.getRecordMaxMonth(data);
+				if (min === max) {
+					return [min];
+				} else {
+					return [min, max];
+				}
 			}
 		}
 	}
