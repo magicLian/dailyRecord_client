@@ -170,12 +170,12 @@
                          ,setClass(item)]">
                         {{item.id}}
                     </div>
-                    <div class="wh_item_img" v-if="item.todayDetail.isEffective">
+                    <div class="wh_item_img" v-if="item.todayDetail.isEffective && item.otherMonth === 'nowMonth'">
                         <img v-show="item.todayDetail.isPeriodStart" src="../../assets/images/periodHelper/startT.png"/>
                         <img v-show="item.todayDetail.isPeriodEnd" src="../../assets/images/periodHelper/endT.png"/>
                         <img v-show="item.todayDetail.hasLove" src="../../assets/images/periodHelper/love.png"/>
                     </div>
-                    <div class="wh_item_img" v-else>
+                    <div class="wh_item_img" v-else-if="item.otherMonth === 'nowMonth'">
                         <img v-show="item.todayDetail.isPeriodStart" src="../../assets/images/periodHelper/startF.png"/>
                         <img v-show="item.todayDetail.isPeriodEnd" src="../../assets/images/periodHelper/endF.png"/>
                         <img v-show="item.todayDetail.hasLove" src="../../assets/images/periodHelper/love.png"/>

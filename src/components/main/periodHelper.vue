@@ -378,9 +378,9 @@
 
                     for (let i = 0; i < resultData.length; i++) {
 
-                    	if(monthDuringArr.length > 1 && timeUtil.compareDate(timeUtil.dateFormatWithoutDay(resultData[i].dayTime),monthDuringArr[0])){
+                    	if(monthDuringArr.length > 1 && timeUtil.compareDate(timeUtil.dateFormatWithoutDay(resultData[i].dayTime),currentMonth)){
 		                    self.$refs.Calendar.showMonthsHistory[currentMonth] = chooseMonthList;
-		                    currentMonth = timeUtil.getOtherMonthFormatWithoutDay(resultData[i].dayTime);
+		                    currentMonth = timeUtil.dateFormatWithoutDay(resultData[i].dayTime);
 		                    chooseMonthList = self.$refs.Calendar.showMonthsHistory[currentMonth];
                         }
 
@@ -422,7 +422,7 @@
 						debug.print("前开始：" + beforePeriodStart);
 
 						const endDay = timeUtil.getDateAddOrMins(clickDay, -1);
-						this.unsetDuringDate(dateTop, beforePeriodStart, endDay);
+						this.unsetDuringDate(timeUtil.dateFormatWithoutDay(beforePeriodStart), beforePeriodStart, endDay);
 						this.todayDetail.isPeriodStart = true;
 						this.$message({
 							type: 'success',
@@ -510,7 +510,7 @@
 						const nearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop, clickDay, 'next');
 						debug.print("后结束：" + nearlyPeriodEnd);
 						const tomorrow = timeUtil.getDateAddOrMins(clickDay, 1);
-						this.unsetDuringDate(dateTop, tomorrow, nearlyPeriodEnd);
+						this.unsetDuringDate(timeUtil.dateFormatWithoutDay(tomorrow), tomorrow, nearlyPeriodEnd);
 						this.todayDetail.isPeriodEnd = true;
 						this.$message({
 							type: 'success',
@@ -522,7 +522,7 @@
 						debug.print("pre:" + preDay);
 						const nearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop, preDay, clickDay, 'pre');
 						if (nearlyPeriodStart) {
-							this.setPeriodAndForcast(dateTop, nearlyPeriodStart, clickDay);
+							this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(nearlyPeriodStart), nearlyPeriodStart, clickDay);
 						} else {
 							this.todayDetail.isPeriodEnd = true;
 						}
@@ -980,7 +980,7 @@
 				let showMouthHistory = self.$refs.Calendar.showMonthsHistory;
 				Object.keys(showMouthHistory).forEach(function (mouth) {
 					showMouthHistory[mouth].forEach(function (day, index) {
-						if (day.isModifyFlag) {
+						if (day.isModifyFlag && day.otherMonth === 'nowMonth') {
 							saveList.push(day.todayDetail);
 						}
 					});
@@ -1002,7 +1002,6 @@
 					data: params,
 				}).done(function (result) {
 					self.loading = false;
-
 					if (result.code === 200) {
 						self.currRecordInsertList = result.data;
 						self.storeMouthRecordIdInHistoryList(result.data);
@@ -1030,6 +1029,7 @@
 			 */
 			returnToMain: function () {
 				this.saveAllMouthDateRecord();
+				//this.$routers
 			},
 
 			/**
@@ -1045,7 +1045,7 @@
 						min = data[i].dayTime;
 					}
 				}
-				return timeUtil.dateFormatWithoutDay(min)
+				return timeUtil.dateFormatWithoutDay(min);
 
 			},
 
@@ -1062,7 +1062,7 @@
 						max = data[i].dayTime;
 					}
 				}
-				return timeUtil.dateFormatWithoutDay(max)
+				return timeUtil.dateFormatWithoutDay(max);
 			},
 
 			/**
