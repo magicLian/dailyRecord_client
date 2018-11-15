@@ -374,30 +374,30 @@
 				if (resultData.length !== 0) {
 					let monthDuringArr = self.getRecordMonthDuring(resultData);
 					let currentMonth = monthDuringArr[0];
-                    let chooseMonthList = self.$refs.Calendar.showMonthsHistory[currentMonth];
+					let chooseMonthList = self.$refs.Calendar.showMonthsHistory[currentMonth];
 
-                    for (let i = 0; i < resultData.length; i++) {
+					for (let i = 0; i < resultData.length; i++) {
 
-                    	if(monthDuringArr.length > 1 && timeUtil.compareDate(timeUtil.dateFormatWithoutDay(resultData[i].dayTime),currentMonth)){
-		                    self.$refs.Calendar.showMonthsHistory[currentMonth] = chooseMonthList;
-		                    currentMonth = timeUtil.dateFormatWithoutDay(resultData[i].dayTime);
-		                    chooseMonthList = self.$refs.Calendar.showMonthsHistory[currentMonth];
-                        }
+						if (monthDuringArr.length > 1 && timeUtil.compareDate(timeUtil.dateFormatWithoutDay(resultData[i].dayTime), currentMonth)) {
+							self.$refs.Calendar.showMonthsHistory[currentMonth] = chooseMonthList;
+							currentMonth = timeUtil.dateFormatWithoutDay(resultData[i].dayTime);
+							chooseMonthList = self.$refs.Calendar.showMonthsHistory[currentMonth];
+						}
 
-                        //循环该月
-                        for (let j = 0; j < chooseMonthList.length; j++) {
-                            //回填id，只回填到正式日期上
-                            if (chooseMonthList[j].otherMonth === 'nowMonth'
-                                    && timeUtil.dateFormat(chooseMonthList[j].date) === timeUtil.dateFormat(resultData[i].dayTime)) {
-	                            chooseMonthList[j].todayDetail.id = resultData[i].id;
-	                            chooseMonthList[j].isModifyFlag = false;
-                                break;
-                            }
-                        }
-                    }
+						//循环该月
+						for (let j = 0; j < chooseMonthList.length; j++) {
+							//回填id，只回填到正式日期上
+							if (chooseMonthList[j].otherMonth === 'nowMonth'
+								&& timeUtil.dateFormat(chooseMonthList[j].date) === timeUtil.dateFormat(resultData[i].dayTime)) {
+								chooseMonthList[j].todayDetail.id = resultData[i].id;
+								chooseMonthList[j].isModifyFlag = false;
+								break;
+							}
+						}
+					}
 					self.$refs.Calendar.showMonthsHistory[currentMonth] = chooseMonthList;
 					self.$refs.Calendar.chooseMonth = self.$refs.Calendar.showMonthsHistory[dateTop];
-                }
+				}
 			},
 			/**
 			 * 经期开始的触发事件
@@ -456,7 +456,7 @@
 					 * 如果今天无效，则无需做什么操作直接点灭即可
 					 */
 					if (this.todayDetail.isEffective) {
-						const afterNearlyPeriodEnd = this.getNearlyPeriodEndInEffective(dateTop, clickDay, 'next');
+						const afterNearlyPeriodEnd = this.getNearlyPeriodEndInEffective(timeUtil.dateFormatWithoutDay(clickDay), clickDay, 'next');
 						debug.print("有效经期结束:" + afterNearlyPeriodEnd);
 
 						const preNearlyPeriodStart = this.getNearlyPeriodStartWithoutEffective(dateTop, timeUtil.getDateAddOrMins(clickDay, -35), clickDay, 'pre');
@@ -465,13 +465,10 @@
 						if (preNearlyPeriodStart) {
 							this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(preNearlyPeriodStart), preNearlyPeriodStart, afterNearlyPeriodEnd);
 						} else {
-							const clickDayTomorrow = timeUtil.getDateAddOrMins(clickDay, 1);
-							debug.print("开始后一天：" + clickDayTomorrow);
 							const yesterdayOfEnd = timeUtil.getDateAddOrMins(afterNearlyPeriodEnd, -1);
 							debug.print("结束前一天：" + yesterdayOfEnd);
 
-							this.unsetDuringDate(dateTop, clickDayTomorrow, yesterdayOfEnd);
-							this.unsetSpecificDate(clickDay, true);
+							this.unsetDuringDate(dateTop, clickDay, yesterdayOfEnd);
 							this.unsetSpecificDate(afterNearlyPeriodEnd, false);
 						}
 					} else {
@@ -542,12 +539,9 @@
 						if (afterPeriodEnd) {
 							this.setPeriodAndForcast(timeUtil.dateFormatWithoutDay(nearlyPeriodStart), nearlyPeriodStart, afterPeriodEnd);
 						} else {
-							const clickDayYesterday = timeUtil.getDateAddOrMins(clickDay, -1);
-							debug.print("结束前一天：" + clickDayYesterday);
 							const tomorrowOfStart = timeUtil.getDateAddOrMins(nearlyPeriodStart, 1);
-							debug.print("开始后一天：" + clickDayYesterday);
-							this.unsetDuringDate(dateTop, tomorrowOfStart, clickDayYesterday);
-							this.unsetSpecificDate(clickDay, true);
+							debug.print("开始后一天：" + tomorrowOfStart);
+							this.unsetDuringDate(timeUtil.dateFormatWithoutDay(tomorrowOfStart), tomorrowOfStart, clickDay);
 							this.unsetSpecificDate(nearlyPeriodStart, false);
 						}
 					} else {
@@ -639,24 +633,29 @@
 				const currMouthList = this.$refs.Calendar.showMonthsHistory[dateTop];
 
 				if (towards === 'pre') {
-					for (let i = currMouthList.length - 1; i > 0; i--) {
-						if (timeUtil.compareDate(currMouthList[i].date, start) || currMouthList[i].date === start) {
-							debug.print("time : " + currMouthList[i].date + "已经遍历超过或者等于开始日期,开始日期:" + flag);
+					for (var i = currMouthList.length - 1; i >= 0; i--) {
+						console.log("i=" + i);
+						if (timeUtil.compareDate(currMouthList[i].date, start)) {
+							debug.print("time : " + currMouthList[i].date + "遍历日期超过开始日期,开始日期:" + flag);
 						} else {
-							if (currMouthList[i].todayDetail.isEffective) {
-								debug.print("time:" + currMouthList[i].date + ",进入比较");
-								if (currMouthList[i].otherMonth === 'nowMonth' && currMouthList[i].todayDetail.isPeriodStart) {
-									flag = currMouthList[i].date;
-									debug.print("find period end :" + flag);
+							if (currMouthList[i].otherMonth === 'nowMonth') {
+								if (currMouthList[i].todayDetail.isEffective) {
+									debug.print("日期:" + currMouthList[i].date + ",进入比较");
+									if (currMouthList[i].todayDetail.isPeriodStart) {
+										flag = currMouthList[i].date;
+										debug.print("找到经期结束日期:" + flag);
+										return flag;
+									}
+								} else {
+									debug.print("日期:" + currMouthList[i].date + ",遇到有效的日期标记停止遍历,开始日期:" + flag);
 									return flag;
 								}
 							} else {
-								debug.print("time : " + currMouthList[i].date + ",遇到有效的日期标记停止遍历,开始日期:" + flag);
-								return flag;
+								dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "preMonth");
+								break;
 							}
 						}
 					}
-					dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "preMonth");
 				} else if (towards === 'next') {
 					for (let j = 0; j < currMouthList.length; j++) {
 						if (timeUtil.compareDate(start, currMouthList[j].date)) {
@@ -665,26 +664,44 @@
 							debug.print("time : " + currMouthList[j].date + "已经超过今天,结束日期:" + flag);
 							return flag;
 						} else {
-							if (currMouthList[j].todayDetail.isEffective) {
-								debug.print("time:" + currMouthList[j].date + ",进入比较");
-								if (currMouthList[j].otherMonth === 'nowMonth' && currMouthList[j].todayDetail.isPeriodStart) {
-									flag = currMouthList[j].date;
-									debug.print("find period start :" + flag);
+							if (currMouthList[j].otherMonth === 'nowMonth') {
+								if (currMouthList[j].todayDetail.isEffective) {
+									debug.print("time:" + currMouthList[j].date + ",进入比较");
+									if (currMouthList[j].todayDetail.isPeriodStart) {
+										flag = currMouthList[j].date;
+										debug.print("find period start :" + flag);
+										return flag;
+									}
+								} else {
+									debug.print("time : " + currMouthList[j].date + ",遇到有效的日期标记停止遍历 , 结束日期:" + flag);
 									return flag;
 								}
 							} else {
-								debug.print("time : " + currMouthList[j].date + ",遇到有效的日期标记停止遍历 , 结束日期:" + flag);
-								return flag;
+								dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
+								break;
 							}
 						}
 					}
-					dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
 				}
-				if (timeUtil.isDateBeyondToday(dateTop + '-1') || !this.$refs.Calendar.showMonthsHistory[dateTop]) {
-					debug.print("find nothing &flag=" + flag);
-					return flag;
-				} else {
-					return this.getNearlyPeriodStartInEffective(dateTop, dateTop + '-1', end, towards);
+
+				//判断向前还是向后
+				if (towards === 'pre') {
+					if (!this.$refs.Calendar.showMonthsHistory[dateTop]) {
+						debug.print("没有找到,日期:" + flag);
+						return flag;
+					} else {
+						//向前需获取上月最后一天为开始
+						let monthDayList = timeUtil.getMonthListNoOther(new Date(dateTop));
+						return this.getNearlyPeriodStartInEffective(dateTop, monthDayList[monthDayList.length - 1].date, towards);
+					}
+				} else if (towards === 'after') {
+					if (timeUtil.isDateBeyondToday(dateTop + '-1') || !this.$refs.Calendar.showMonthsHistory[dateTop]) {
+						debug.print("没有找到,日期:" + flag);
+						return flag;
+					} else {
+						//向后需指定下月1号为开始
+						return this.getNearlyPeriodStartInEffective(dateTop, dateTop + '-1', towards);
+					}
 				}
 			},
 
@@ -775,20 +792,24 @@
 						if (timeUtil.compareDate(currMouthList[i].date, start)) {
 							debug.print("time : " + currMouthList[i].date + ",比起始日期后, 继续");
 						} else {
-							if (currMouthList[i].todayDetail.isEffective) {
-								debug.print("time:" + currMouthList[i].date + ",进入比较");
-								if (currMouthList[i].otherMonth === 'nowMonth' && currMouthList[i].todayDetail.isPeriodEnd) {
-									flag = currMouthList[i].date;
-									debug.print("find period end :" + flag);
+							if (currMouthList[i].otherMonth === 'nowMonth') {
+								if (currMouthList[i].todayDetail.isEffective) {
+									debug.print("time:" + currMouthList[i].date + ",进入比较");
+									if (currMouthList[i].todayDetail.isPeriodEnd) {
+										flag = currMouthList[i].date;
+										debug.print("find period end :" + flag);
+										return flag;
+									}
+								} else {
+									debug.print("time : " + currMouthList[i].date + ",遇到无效的日期标记停止遍历 , 结束日期:" + flag);
 									return flag;
 								}
 							} else {
-								debug.print("time : " + currMouthList[i].date + ",遇到无效的日期标记停止遍历 , 结束日期:" + flag);
-								return flag;
+								dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "preMonth");
+								break;
 							}
 						}
 					}
-					dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "preMonth");
 				} else if (towards === 'next') {
 					for (let j = 0; j < currMouthList.length; j++) {
 						if (timeUtil.compareDate(start, currMouthList[j].date) || currMouthList[j].date === start) {
@@ -797,27 +818,31 @@
 							debug.print("time : " + currMouthList[j].date + "已经超过今天,结束日期:" + flag);
 							return flag;
 						} else {
-							if (currMouthList[j].todayDetail.isEffective) {
-								debug.print("time:" + currMouthList[j].date + ",进入比较");
-								if (currMouthList[j].otherMonth === 'nowMonth' && currMouthList[j].todayDetail.isPeriodEnd) {
-									flag = currMouthList[j].date;
-									debug.print("find period end :" + flag);
+							if (currMouthList[i].otherMonth === 'nowMonth') {
+								if (currMouthList[j].todayDetail.isEffective) {
+									debug.print("time:" + currMouthList[j].date + ",进入比较");
+									if (currMouthList[j].todayDetail.isPeriodEnd) {
+										flag = currMouthList[j].date;
+										debug.print("find period end :" + flag);
+										return flag;
+									}
+								} else {
+									debug.print("time : " + currMouthList[j].date + ",遇到无效的日期标记停止遍历 , 结束日期:" + flag);
 									return flag;
 								}
 							} else {
-								debug.print("time : " + currMouthList[j].date + ",遇到无效的日期标记停止遍历 , 结束日期:" + flag);
-								return flag;
+								dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
+								break;
 							}
 						}
 					}
-					dateTop = timeUtil.getOtherMonthFormatWithoutDay(new Date(dateTop), "nextMonth");
 				}
 
 				if (timeUtil.isDateBeyondToday(dateTop + '-1') || !this.$refs.Calendar.showMonthsHistory[dateTop]) {
 					debug.print("find nothing &flag=" + flag);
 					return flag;
 				} else {
-					return this.getNearlyPeriodEndInEffective(dateTop, dateTop + '-1', end, towards);
+					return this.getNearlyPeriodEndInEffective(dateTop, dateTop + '-1', towards);
 				}
 			},
 
@@ -894,7 +919,7 @@
 						monthList[i].markClassName = "";
 						monthList[i].isModifyFlag = true;
 					}
-					if (monthList[i].date === endDay && monthList[i].otherMonth === 'nowMonth') {
+					if (monthList[i].date === endDay) {
 						flag = true;
 						monthList[i].todayDetail.isPeriodStart = false;
 						monthList[i].todayDetail.isPeriodEnd = false;
@@ -902,7 +927,10 @@
 						monthList[i].todayDetail.dayType = "";
 						monthList[i].markClassName = "";
 						monthList[i].isModifyFlag = true;
-						break;
+
+						if (monthList[i].otherMonth === 'nowMonth') {
+							break;
+						}
 					}
 					if (timeUtil.compareDate(monthList[i].date, startDay)) {
 						monthList[i].todayDetail.isPeriodStart = false;
