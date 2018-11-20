@@ -4,7 +4,7 @@
 
 
 const config = {
-	baseUrl : "http://localhost:8081",
+	baseUrl : "http://192.168.0.95:8081",
 	debug : true
 };
 

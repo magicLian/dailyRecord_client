@@ -1,10 +1,8 @@
 /**
  * debug
  */
-import config from "./config";
-
 const debug = {
-	isDebug: config.isDebug,
+	isDebug: true,
 	print: function (message) {
 		if (this.isDebug) {
 			console.log(message);

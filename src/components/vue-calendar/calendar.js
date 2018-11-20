@@ -173,6 +173,13 @@ export default {
 		return this.dateFormat(newD);
 	},
 
+	countDateDistance: function (start, end) {
+		let date1 = new Date(start);
+		let date2 = new Date(end);
+		let count = (date2.getTime() - date1.getTime()) / (1000 * 60 * 60 * 24);
+		return count;
+	},
+
 	//默认是周一开始
 	sundayStart: false
 }
